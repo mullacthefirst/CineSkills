@@ -128,7 +128,7 @@ function init() {
   switchView('profile');
 }
 
-export async function loadStudentProgress(studentId) {
+export function loadStudentProgress(studentId) {
   currentState.isInitialLoad = true;
   const localKey = `cinegrade_progress_${studentId}`;
   const cineskillsKey = `cineskills_progress_${studentId}`;
@@ -145,20 +145,9 @@ export async function loadStudentProgress(studentId) {
     });
   }
 
-  try {
-    const cloudProgress = await pullProgressFromCloud(studentId);
-    if (cloudProgress) {
-      saved = JSON.stringify(cloudProgress);
-      localStorage.setItem(localKey, saved);
-      localStorage.setItem(cineskillsKey, saved);
-    }
-  } catch (err) {
-    console.warn("Could not pull cloud progress:", err);
-  }
-
   if (saved) {
     try {
-      const parsed = JSON.parse(saved);
+      const parsed = typeof saved === "string" ? JSON.parse(saved) : saved;
       Object.keys(parsed).forEach(skillName => {
         const val = parsed[skillName];
         if (typeof val === "object" && val !== null) {
@@ -176,19 +165,41 @@ export async function loadStudentProgress(studentId) {
     } catch (e) {
       console.error("Error loading progress data", e);
     }
-  } else {
-    saveStudentProgress();
   }
-  
+
+  // Render UI IMMEDIATELY (0ms delay!)
   updateDashboard();
   renderSkillMatrix();
   updateStudentHeader();
-  
+  currentState.isInitialLoad = false;
+
   const profileView = document.getElementById("profile-view");
   if (profileView && profileView.classList.contains("active")) {
     renderProfileView();
   }
-  currentState.isInitialLoad = false;
+
+  // Background Cloud Pull (Non-blocking!)
+  pullProgressFromCloud(studentId).then(cloudProgress => {
+    if (cloudProgress) {
+      const cloudSaved = JSON.stringify(cloudProgress);
+      localStorage.setItem(localKey, cloudSaved);
+      localStorage.setItem(cineskillsKey, cloudSaved);
+      
+      Object.keys(cloudProgress).forEach(skillName => {
+        const val = cloudProgress[skillName];
+        if (typeof val === "object" && val !== null) {
+          currentState.progress[skillName] = {
+            level: val.level !== undefined ? val.level : (val.completed === true ? 2 : 0),
+            notes: val.notes || ""
+          };
+        }
+      });
+
+      updateDashboard();
+      renderSkillMatrix();
+      updateStudentHeader();
+    }
+  }).catch(err => console.warn("Cloud pull background warning:", err));
 }
 
 export function updateDashboard() {
@@ -420,6 +431,11 @@ function updateAuroraPosition() {
 }
 
 export function openLoginOverlay() {
+  const activeStudentDisplay = document.getElementById("active-student-display");
+  if (activeStudentDisplay && !currentState.selectedStudent) {
+    activeStudentDisplay.textContent = "👤 Sign In";
+  }
+
   const loginName = document.getElementById("login-name");
   const loginId = document.getElementById("login-id");
   if (loginName) loginName.value = "";
