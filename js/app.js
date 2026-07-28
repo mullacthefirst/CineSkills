@@ -422,8 +422,8 @@ function updateAuroraPosition() {
 export function openLoginOverlay() {
   const loginName = document.getElementById("login-name");
   const loginId = document.getElementById("login-id");
-  if (loginName) loginName.value = localStorage.getItem("cinegrade_student_name") || "";
-  if (loginId) loginId.value = localStorage.getItem("cinegrade_student_id") || "";
+  if (loginName) loginName.value = "";
+  if (loginId) loginId.value = "";
   
   const closeLoginBtn = document.getElementById("close-login-btn");
   if (closeLoginBtn) {
