@@ -38,12 +38,15 @@
     </div>
     
     <div class="nav-controls">
-      <span id="active-student-display" class="student-badge" style="cursor: pointer;" onclick="openLoginOverlay()" title="Click to edit student details">👤 Loading student...</span>
+      <span id="active-student-display" class="student-badge" style="cursor: pointer;" onclick="openLoginOverlay()" title="Click to edit student details">👤 Sign In / Switch Profile</span>
       
       <!-- Settings Menu -->
       <div class="settings-menu-container">
         <button id="settings-cog-btn" class="settings-cog-btn" aria-label="Settings" onclick="toggleSettingsMenu()">⚙️</button>
         <div id="settings-dropdown" class="settings-dropdown">
+          <button id="switch-student-menu-btn" class="menu-item" onclick="openLoginOverlay()">
+            <span class="menu-item-icon">👤</span> Switch Student Profile
+          </button>
           <button id="theme-toggle-btn" class="menu-item" onclick="toggleTheme()">
             <span class="menu-item-icon">☀️</span> <span id="theme-btn-text">Light Mode</span>
           </button>

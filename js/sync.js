@@ -10,29 +10,21 @@ let SUPABASE_KEY = localStorage.getItem("cinegrade_supabase_key") || DEFAULT_SUP
 let supabaseClient = null;
 
 export function initSupabase() {
-  let storedUrl = localStorage.getItem("cinegrade_supabase_url") || localStorage.getItem("cineskills_supabase_url");
-  let storedKey = localStorage.getItem("cinegrade_supabase_key") || localStorage.getItem("cineskills_supabase_key");
+  let rawUrl = localStorage.getItem("cinegrade_supabase_url") || DEFAULT_SUPABASE_URL;
+  let rawKey = localStorage.getItem("cinegrade_supabase_key") || DEFAULT_SUPABASE_KEY;
 
-  if (storedUrl) {
-    storedUrl = storedUrl.replace(/\/rest\/v1\/?$/, "").replace(/\/+$/, "").trim();
-    if (storedUrl.includes("rest/v1") || storedUrl.includes("/rest")) {
-      storedUrl = DEFAULT_SUPABASE_URL;
-    }
+  // Clean trailing /rest/v1 or trailing slashes if present
+  if (rawUrl) {
+    rawUrl = rawUrl.replace(/\/rest\/v1\/?$/, "").replace(/\/+$/, "");
   }
 
-  SUPABASE_URL = storedUrl || DEFAULT_SUPABASE_URL;
-  SUPABASE_KEY = storedKey || DEFAULT_SUPABASE_KEY;
-
-  // Overwrite broken local storage entries with clean URL
-  localStorage.setItem("cinegrade_supabase_url", SUPABASE_URL);
-  localStorage.setItem("cineskills_supabase_url", SUPABASE_URL);
-  localStorage.setItem("cinegrade_supabase_key", SUPABASE_KEY);
-  localStorage.setItem("cineskills_supabase_key", SUPABASE_KEY);
+  SUPABASE_URL = rawUrl;
+  SUPABASE_KEY = rawKey;
 
   if (SUPABASE_URL && SUPABASE_KEY && window.supabase) {
     try {
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      console.log("[Cloud Sync] Supabase client initialized with URL:", SUPABASE_URL);
+      console.log("[Cloud Sync] Supabase initialized successfully with base URL:", SUPABASE_URL);
     } catch (e) {
       console.warn("[Cloud Sync] Failed to initialize Supabase client", e);
     }
@@ -80,7 +72,7 @@ export function syncProgressToCloud() {
     }
 
     try {
-      let { data, error } = await supabaseClient
+      const { data, error } = await supabaseClient
         .from('cineskills_student_progress')
         .upsert({
           student_id: studentId,
@@ -91,31 +83,16 @@ export function syncProgressToCloud() {
           updated_at: new Date().toISOString()
         }, { onConflict: 'student_id' });
 
-      if (error && error.message.includes('relation "cineskills_student_progress" does not exist')) {
-        // Fallback to legacy cinegrade_student_progress table
-        const res = await supabaseClient
-          .from('cinegrade_student_progress')
-          .upsert({
-            student_id: studentId,
-            student_name: studentName,
-            progress_json: progress,
-            xp: earnedXp,
-            mastered_count: masteredCount,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'student_id' });
-        error = res.error;
-      }
-
       if (error) {
-        console.error("[Cloud Sync] Database error during sync:", error.message, error.details || "");
-        updateCloudSyncStatusIndicator("error", error.message);
+        console.error("[Cloud Sync] Database error during sync:", error.message);
+        updateCloudSyncStatusIndicator("error");
       } else {
         console.log("[Cloud Sync] Progress synced to cloud successfully for:", studentName);
         updateCloudSyncStatusIndicator("synced");
       }
     } catch (err) {
       console.error("[Cloud Sync] Exception during cloud sync:", err);
-      updateCloudSyncStatusIndicator("error", err.message || "Network exception");
+      updateCloudSyncStatusIndicator("error");
     }
   }, 1200); // 1.2 second debounce
 }
@@ -125,20 +102,11 @@ export async function pullProgressFromCloud(studentId) {
   if (!studentId || !supabaseClient) return null;
 
   try {
-    let { data, error } = await supabaseClient
+    const { data, error } = await supabaseClient
       .from('cineskills_student_progress')
       .select('*')
       .eq('student_id', studentId)
       .single();
-
-    if (error) {
-      const res = await supabaseClient
-        .from('cinegrade_student_progress')
-        .select('*')
-        .eq('student_id', studentId)
-        .single();
-      data = res.data;
-    }
 
     if (data && data.progress_json) {
       console.log("[Cloud Sync] Pulled student progress from cloud!");
@@ -157,18 +125,9 @@ export async function fetchTeacherClassroomData() {
   }
 
   try {
-    let { data, error } = await supabaseClient
+    const { data, error } = await supabaseClient
       .from('cineskills_student_progress')
       .select('*')
-      .order('xp', { ascending: false });
-
-    if (error) {
-      const res = await supabaseClient
-        .from('cinegrade_student_progress')
-        .select('*')
-        .order('xp', { ascending: false });
-      data = res.data;
-    }
       .order('xp', { ascending: false });
 
     if (data && data.length > 0) {
@@ -241,7 +200,7 @@ function getLocalTeacherClassroomData() {
 }
 
 // Quiet Cloud Status Indicator in Navbar (Replaces intrusive Toast popups)
-export function updateCloudSyncStatusIndicator(status, details = "") {
+export function updateCloudSyncStatusIndicator(status) {
   let badge = document.getElementById("cloud-sync-status-badge");
   if (!badge) {
     const parent = document.querySelector(".nav-controls");
@@ -267,13 +226,11 @@ export function updateCloudSyncStatusIndicator(status, details = "") {
     badge.style.background = "rgba(59, 130, 246, 0.15)";
     badge.style.color = "var(--accent-blue)";
     badge.style.opacity = "1";
-    badge.title = "Saving student progress to cloud...";
   } else if (status === "synced") {
     badge.innerHTML = "☁️ <strong>Synced</strong>";
     badge.style.background = "rgba(16, 185, 129, 0.15)";
     badge.style.color = "var(--color-completed)";
     badge.style.opacity = "1";
-    badge.title = "Student progress synced to cloud";
     setTimeout(() => {
       badge.style.opacity = "0.5";
     }, 2000);
@@ -282,13 +239,11 @@ export function updateCloudSyncStatusIndicator(status, details = "") {
     badge.style.background = "rgba(255, 255, 255, 0.05)";
     badge.style.color = "var(--text-muted)";
     badge.style.opacity = "0.6";
-    badge.title = "Operating in local storage mode";
   } else if (status === "error") {
     badge.innerHTML = "⚠️ Sync Error";
     badge.style.background = "rgba(239, 68, 68, 0.15)";
     badge.style.color = "var(--color-locked)";
     badge.style.opacity = "1";
-    badge.title = details ? `Sync Error: ${details}` : "Click Settings -> Educator View -> Cloud Setup to verify API key & RLS table policy";
   }
 }
 

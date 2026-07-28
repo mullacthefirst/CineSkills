@@ -1,5 +1,5 @@
 // CineSkills Service Worker — 100% Offline Capability
-const CACHE_NAME = "cineskills-v3";
+const CACHE_NAME = "cineskills-v4";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
