@@ -128,18 +128,33 @@ function init() {
   switchView('profile');
 }
 
-export function loadStudentProgress(studentId) {
+export async function loadStudentProgress(studentId) {
   currentState.isInitialLoad = true;
   const localKey = `cinegrade_progress_${studentId}`;
-  const saved = localStorage.getItem(localKey);
+  const cineskillsKey = `cineskills_progress_${studentId}`;
+  let saved = localStorage.getItem(localKey) || localStorage.getItem(cineskillsKey);
   
   currentState.progress = {};
   
-  CINEGRADE_DATABASE.categories.forEach(cat => {
-    cat.skills.forEach(skill => {
-      currentState.progress[skill.name] = { level: 0, notes: "" };
+  const db = window.CINESKILLS_DATABASE || window.CINEGRADE_DATABASE;
+  if (db && db.categories) {
+    db.categories.forEach(cat => {
+      cat.skills.forEach(skill => {
+        currentState.progress[skill.name] = { level: 0, notes: "" };
+      });
     });
-  });
+  }
+
+  try {
+    const cloudProgress = await pullProgressFromCloud(studentId);
+    if (cloudProgress) {
+      saved = JSON.stringify(cloudProgress);
+      localStorage.setItem(localKey, saved);
+      localStorage.setItem(cineskillsKey, saved);
+    }
+  } catch (err) {
+    console.warn("Could not pull cloud progress:", err);
+  }
 
   if (saved) {
     try {
