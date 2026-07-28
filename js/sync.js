@@ -10,21 +10,23 @@ let SUPABASE_KEY = localStorage.getItem("cinegrade_supabase_key") || DEFAULT_SUP
 let supabaseClient = null;
 
 export function initSupabase() {
-  let rawUrl = localStorage.getItem("cinegrade_supabase_url") || DEFAULT_SUPABASE_URL;
-  let rawKey = localStorage.getItem("cinegrade_supabase_key") || DEFAULT_SUPABASE_KEY;
+  let rawUrl = localStorage.getItem("cinegrade_supabase_url") || localStorage.getItem("cineskills_supabase_url") || DEFAULT_SUPABASE_URL;
+  let rawKey = localStorage.getItem("cinegrade_supabase_key") || localStorage.getItem("cineskills_supabase_key") || DEFAULT_SUPABASE_KEY;
 
-  // Clean trailing /rest/v1 or trailing slashes if present
-  if (rawUrl) {
-    rawUrl = rawUrl.replace(/\/rest\/v1\/?$/, "").replace(/\/+$/, "");
+  // Purge legacy /rest/v1/ suffixes from user's localStorage
+  if (rawUrl && rawUrl.includes("rest/v1")) {
+    rawUrl = "https://xronqdapgcqezmwrwdap.supabase.co";
+    localStorage.setItem("cinegrade_supabase_url", rawUrl);
+    localStorage.setItem("cineskills_supabase_url", rawUrl);
   }
 
-  SUPABASE_URL = rawUrl;
-  SUPABASE_KEY = rawKey;
+  SUPABASE_URL = rawUrl || DEFAULT_SUPABASE_URL;
+  SUPABASE_KEY = rawKey || DEFAULT_SUPABASE_KEY;
 
   if (SUPABASE_URL && SUPABASE_KEY && window.supabase) {
     try {
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      console.log("[Cloud Sync] Supabase initialized successfully with base URL:", SUPABASE_URL);
+      console.log("[Cloud Sync] Supabase client initialized with URL:", SUPABASE_URL);
     } catch (e) {
       console.warn("[Cloud Sync] Failed to initialize Supabase client", e);
     }
