@@ -72,7 +72,7 @@ export function syncProgressToCloud() {
     }
 
     try {
-      const { data, error } = await supabaseClient
+      let { data, error } = await supabaseClient
         .from('cinegrade_student_progress')
         .upsert({
           student_id: studentId,
@@ -83,16 +83,31 @@ export function syncProgressToCloud() {
           updated_at: new Date().toISOString()
         }, { onConflict: 'student_id' });
 
+      if (error && error.message.includes('relation "cinegrade_student_progress" does not exist')) {
+        // Fallback to cineskills_student_progress
+        const res = await supabaseClient
+          .from('cineskills_student_progress')
+          .upsert({
+            student_id: studentId,
+            student_name: studentName,
+            progress_json: progress,
+            xp: earnedXp,
+            mastered_count: masteredCount,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'student_id' });
+        error = res.error;
+      }
+
       if (error) {
-        console.error("[Cloud Sync] Database error during sync:", error.message);
-        updateCloudSyncStatusIndicator("error");
+        console.error("[Cloud Sync] Database error during sync:", error.message, error.details || "");
+        updateCloudSyncStatusIndicator("error", error.message);
       } else {
         console.log("[Cloud Sync] Progress synced to cloud successfully for:", studentName);
         updateCloudSyncStatusIndicator("synced");
       }
     } catch (err) {
       console.error("[Cloud Sync] Exception during cloud sync:", err);
-      updateCloudSyncStatusIndicator("error");
+      updateCloudSyncStatusIndicator("error", err.message || "Network exception");
     }
   }, 1200); // 1.2 second debounce
 }
@@ -200,7 +215,7 @@ function getLocalTeacherClassroomData() {
 }
 
 // Quiet Cloud Status Indicator in Navbar (Replaces intrusive Toast popups)
-export function updateCloudSyncStatusIndicator(status) {
+export function updateCloudSyncStatusIndicator(status, details = "") {
   let badge = document.getElementById("cloud-sync-status-badge");
   if (!badge) {
     const parent = document.querySelector(".nav-controls");
@@ -226,11 +241,13 @@ export function updateCloudSyncStatusIndicator(status) {
     badge.style.background = "rgba(59, 130, 246, 0.15)";
     badge.style.color = "var(--accent-blue)";
     badge.style.opacity = "1";
+    badge.title = "Saving student progress to cloud...";
   } else if (status === "synced") {
     badge.innerHTML = "☁️ <strong>Synced</strong>";
     badge.style.background = "rgba(16, 185, 129, 0.15)";
     badge.style.color = "var(--color-completed)";
     badge.style.opacity = "1";
+    badge.title = "Student progress synced to cloud";
     setTimeout(() => {
       badge.style.opacity = "0.5";
     }, 2000);
@@ -239,11 +256,13 @@ export function updateCloudSyncStatusIndicator(status) {
     badge.style.background = "rgba(255, 255, 255, 0.05)";
     badge.style.color = "var(--text-muted)";
     badge.style.opacity = "0.6";
+    badge.title = "Operating in local storage mode";
   } else if (status === "error") {
     badge.innerHTML = "⚠️ Sync Error";
     badge.style.background = "rgba(239, 68, 68, 0.15)";
     badge.style.color = "var(--color-locked)";
     badge.style.opacity = "1";
+    badge.title = details ? `Sync Error: ${details}` : "Click Settings -> Educator View -> Cloud Setup to verify API key & RLS table policy";
   }
 }
 
