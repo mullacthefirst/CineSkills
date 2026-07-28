@@ -1,5 +1,5 @@
-// CineSkills Service Worker — 100% Offline Capability
-const CACHE_NAME = "cineskills-v4";
+// CineSkills Service Worker — 100% Offline Capability (Network First with Cache Fallback)
+const CACHE_NAME = "cineskills-v5";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -21,13 +21,13 @@ const ASSETS_TO_CACHE = [
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log("[Service Worker] Pre-caching CineGrade app shell");
+      console.log("[Service Worker] Pre-caching CineSkills app shell");
       return cache.addAll(ASSETS_TO_CACHE);
     }).then(() => self.skipWaiting())
   );
 });
 
-// Activate Event — Clean up old caches
+// Activate Event — Clean up all old caches immediately
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keyList) => {
@@ -43,45 +43,25 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Fetch Event — Cache First with Network Fallback strategy
+// Fetch Event — Network First with Offline Cache Fallback strategy
 self.addEventListener("fetch", (event) => {
-  // Ignore non-GET requests or external API calls (e.g. Supabase API)
   if (event.request.method !== "GET" || event.request.url.includes("supabase.co")) {
     return;
   }
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        // Return cached asset immediately
-        // Fetch background update for cache refresh (Stale-While-Revalidate pattern)
-        fetch(event.request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse));
-          }
-        }).catch(() => {/* Offline fallback */});
-        
-        return cachedResponse;
-      }
-
-      // If not in cache, fetch from network and store copy in cache
-      return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== "basic") {
-          return networkResponse;
+    fetch(event.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
         }
-
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
-
         return networkResponse;
-      }).catch(() => {
-        // Offline fallback for html pages
-        if (event.request.headers.get("accept").includes("text/html")) {
-          return caches.match("./index.html");
-        }
-      });
-    })
+      })
+      .catch(() => {
+        return caches.match(event.request);
+      })
   );
 });
