@@ -73,7 +73,7 @@ export function syncProgressToCloud() {
 
     try {
       let { data, error } = await supabaseClient
-        .from('cinegrade_student_progress')
+        .from('cineskills_student_progress')
         .upsert({
           student_id: studentId,
           student_name: studentName,
@@ -83,10 +83,10 @@ export function syncProgressToCloud() {
           updated_at: new Date().toISOString()
         }, { onConflict: 'student_id' });
 
-      if (error && error.message.includes('relation "cinegrade_student_progress" does not exist')) {
-        // Fallback to cineskills_student_progress
+      if (error && error.message.includes('relation "cineskills_student_progress" does not exist')) {
+        // Fallback to legacy cinegrade_student_progress table
         const res = await supabaseClient
-          .from('cineskills_student_progress')
+          .from('cinegrade_student_progress')
           .upsert({
             student_id: studentId,
             student_name: studentName,
@@ -117,11 +117,20 @@ export async function pullProgressFromCloud(studentId) {
   if (!studentId || !supabaseClient) return null;
 
   try {
-    const { data, error } = await supabaseClient
-      .from('cinegrade_student_progress')
+    let { data, error } = await supabaseClient
+      .from('cineskills_student_progress')
       .select('*')
       .eq('student_id', studentId)
       .single();
+
+    if (error) {
+      const res = await supabaseClient
+        .from('cinegrade_student_progress')
+        .select('*')
+        .eq('student_id', studentId)
+        .single();
+      data = res.data;
+    }
 
     if (data && data.progress_json) {
       console.log("[Cloud Sync] Pulled student progress from cloud!");
@@ -140,9 +149,18 @@ export async function fetchTeacherClassroomData() {
   }
 
   try {
-    const { data, error } = await supabaseClient
-      .from('cinegrade_student_progress')
+    let { data, error } = await supabaseClient
+      .from('cineskills_student_progress')
       .select('*')
+      .order('xp', { ascending: false });
+
+    if (error) {
+      const res = await supabaseClient
+        .from('cinegrade_student_progress')
+        .select('*')
+        .order('xp', { ascending: false });
+      data = res.data;
+    }
       .order('xp', { ascending: false });
 
     if (data && data.length > 0) {
