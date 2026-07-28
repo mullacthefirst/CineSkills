@@ -1,4 +1,4 @@
-﻿const CINEGRADE_DATABASE = {
+window.CINESKILLS_DATABASE = {
   categories: [
     {
       id: "story",
@@ -559,3 +559,7 @@ const CINEGRADE_EQUIPMENT = [
     obsidianPath: '00_Reference Notes/02_SCUC Equipment/Cameras & Video/JVC HM620E.md'
   }
 ];
+
+window.CINEGRADE_DATABASE = window.CINESKILLS_DATABASE;
+var CINEGRADE_DATABASE = window.CINESKILLS_DATABASE;
+var CINESKILLS_DATABASE = window.CINESKILLS_DATABASE;

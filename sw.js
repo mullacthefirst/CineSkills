@@ -1,11 +1,11 @@
-// CineGrade Service Worker — 100% Offline Capability
-const CACHE_NAME = "cinegrade-cache-v1";
+// CineSkills Service Worker — 100% Offline Capability
+const CACHE_NAME = "cineskills-v2";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
   "./style.css",
   "./data.js",
-  "./cinegrade_db.json",
+  "./cineskills_db.json",
   "./manifest.json",
   "./js/app.js",
   "./js/state.js",
