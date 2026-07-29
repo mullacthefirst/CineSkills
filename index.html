@@ -77,6 +77,9 @@
             <button id="reset-progress-btn" class="menu-item text-danger" onclick="confirmResetProgress()" style="color: var(--color-locked);">
               <span class="menu-item-icon">⚠️</span> Reset Progress
             </button>
+            <button id="signout-btn" class="menu-item" onclick="handleSignOut()" style="color: var(--color-partial);">
+              <span class="menu-item-icon">🚪</span> Sign Out
+            </button>
             <hr class="menu-divider">
             <div class="menu-section-header">Accessibility</div>
             <button id="dyslexia-font-btn" class="menu-item" onclick="toggleDyslexiaFont()">
@@ -146,16 +149,6 @@
               <option value="0">🔴 Do not Understand</option>
               <option value="1">🟡 Sort of Understand</option>
               <option value="2">🟢 Fully Understand</option>
-            </select>
-          </div>
-
-          <div class="filter-wrapper">
-            <span class="filter-label">Tier:</span>
-            <select id="tier-filter" class="custom-select">
-              <option value="all">All Tiers</option>
-              <option value="1">Beginner (100 XP)</option>
-              <option value="2">Intermediate (200 XP)</option>
-              <option value="3">Master (300 XP)</option>
             </select>
           </div>
 
@@ -649,7 +642,7 @@
   </div>
 
   <!-- Import application JS scripts -->
-  <script src="data.js?v=19"></script>
-  <script type="module" src="js/app.js?v=19"></script>
+  <script src="data.js?v=20"></script>
+  <script type="module" src="js/app.js?v=20"></script>
 </body>
 </html>

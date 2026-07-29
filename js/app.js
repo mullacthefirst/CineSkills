@@ -4,8 +4,8 @@ import { renderSkillMatrix, toggleTierSection, cycleSkillLevel, openSkillDetail,
 import { renderProfileView, savePortfolioBio, updateShowreel, openAddProjectModal, closeAddProjectModal, handleAddProjectSubmit, deletePortfolioProject, exportData, importData, exportPDF } from './profile.js';
 import { logProgressHistory } from './charts.js';
 import { renderGearView, renderLicenseDashboard, downloadCertificate } from './gear.js';
-import { renderQuestsView, renderInspirationView, getQuestBonusXp, startMicroQuiz, nextQuizStep, applyQuizRecommendation, claimQuestReward, ACHIEVEMENT_BADGES, renderAchievements } from './quests.js';
-import { initSupabase, syncProgressToCloud, pullProgressFromCloud, openTeacherDashboardModal, configureCloudSyncPrompt } from './sync.js';
+import { renderQuestsView, renderInspirationView, getQuestBonusXp, startMicroQuiz, nextQuizStep, applyQuizRecommendation, claimQuestReward, ACHIEVEMENT_BADGES, renderAchievements, checkAchievementUnlocks } from './quests.js';
+import { initSupabase, syncProgressToCloud, pullProgressFromCloud, openTeacherDashboardModal, configureCloudSyncPrompt, hashStudentId } from './sync.js';
 
 let targetX = 0, targetY = 0, curX = 0, curY = 0;
 let deferredPrompt = null;
@@ -247,6 +247,7 @@ export function updateDashboard() {
   if (progressBarEl) progressBarEl.style.width = `${pct}%`;
 
   logProgressHistory(pct);
+  checkAchievementUnlocks();
   checkBackupMilestones(pct);
 
   const { current, next } = getDirectorRank(pct);
@@ -506,7 +507,48 @@ export function toggleTheme() {
   selectTheme(themes[nextIndex]);
 }
 
-export function handleLogin(event) {
+export function getRegisteredAccounts() {
+  try {
+    const raw = localStorage.getItem("cineskills_registered_accounts");
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+export function saveRegisteredAccount(username, authHash) {
+  const accounts = getRegisteredAccounts();
+  const key = username.toLowerCase().trim();
+  accounts[key] = {
+    username: username,
+    authHash: authHash,
+    createdAt: new Date().toISOString()
+  };
+  localStorage.setItem("cineskills_registered_accounts", JSON.stringify(accounts));
+}
+
+export function handleSignOut() {
+  if (confirm("Are you sure you want to sign out?")) {
+    sessionStorage.removeItem("cineskills_active_student_id");
+    sessionStorage.removeItem("cineskills_active_student_name");
+    localStorage.removeItem("cineskills_last_student_id");
+    localStorage.removeItem("cineskills_last_student_name");
+    localStorage.removeItem("cineskills_student_id");
+    localStorage.removeItem("cineskills_student_name");
+
+    currentState.selectedStudent = "";
+    currentState.progress = {};
+
+    const activeStudentDisplay = document.getElementById("active-student-display");
+    if (activeStudentDisplay) {
+      activeStudentDisplay.textContent = "👤 Sign In / Switch Profile";
+    }
+
+    openLoginOverlay();
+  }
+}
+
+export async function handleLogin(event) {
   if (event) {
     if (typeof event.preventDefault === "function") event.preventDefault();
     if (typeof event.stopPropagation === "function") event.stopPropagation();
@@ -522,34 +564,51 @@ export function handleLogin(event) {
     return false;
   }
 
-  try {
-    if (usernameInput.toLowerCase() === "alan smithee" || passwordInput.toLowerCase() === "alan smithee") {
-      triggerAlanSmitheeMode();
-      return false;
-    }
-
-    if (currentState.isAlanSmithee) {
-      currentState.isAlanSmithee = false;
-      document.body.classList.remove("smithee-mode");
-    }
-
-    const sanitizedUser = usernameInput.toLowerCase().replace(/[^a-z0-9_-]/g, "");
-    const sessionStudentId = sanitizedUser || usernameInput;
-
-    setActiveStudentSession(sessionStudentId, usernameInput);
-    currentState.selectedStudent = sessionStudentId;
-    updateStudentHeader();
-
-    // Instantly load student local progress
-    loadStudentProgress(sessionStudentId);
-  } catch (err) {
-    console.error("[Login Error] Exception during local login setup:", err);
-  } finally {
-    // ALWAYS remove overlay active state
-    closeLoginOverlay();
+  if (usernameInput.toLowerCase() === "alan smithee" || passwordInput.toLowerCase() === "alan smithee") {
+    triggerAlanSmitheeMode();
+    return false;
   }
 
-  // Non-blocking background cloud restore
+  const sanitizedUser = usernameInput.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+  const sessionStudentId = sanitizedUser || usernameInput.toLowerCase();
+
+  const accounts = getRegisteredAccounts();
+  const account = accounts[sessionStudentId];
+
+  // If local account registry exists and account is missing, check account registration!
+  if (!account && Object.keys(accounts).length > 0) {
+    alert(`No account found for username "${usernameInput}". Please click 'Create Account' to register your account first.`);
+    switchAuthTab('register');
+    const regUserEl = document.getElementById("reg-username");
+    if (regUserEl) regUserEl.value = usernameInput;
+    return false;
+  }
+
+  const authHash = await hashStudentId(sessionStudentId + ":" + passwordInput);
+
+  if (account && account.authHash && account.authHash !== authHash) {
+    alert(`Incorrect Password / PIN for username "${usernameInput}". Please try again.`);
+    return false;
+  }
+
+  // Register account record if missing
+  if (!account) {
+    saveRegisteredAccount(usernameInput, authHash);
+  }
+
+  if (currentState.isAlanSmithee) {
+    currentState.isAlanSmithee = false;
+    document.body.classList.remove("smithee-mode");
+  }
+
+  setActiveStudentSession(sessionStudentId, usernameInput);
+  currentState.selectedStudent = sessionStudentId;
+  updateStudentHeader();
+
+  loadStudentProgress(sessionStudentId);
+  closeLoginOverlay();
+
+  // Background cloud restore
   pullProgressFromCloud(currentState.selectedStudent).then(cloudProgress => {
     if (cloudProgress) {
       currentState.progress = cloudProgress;
@@ -595,7 +654,7 @@ export function switchAuthTab(tabName) {
   }
 }
 
-export function handleRegister(event) {
+export async function handleRegister(event) {
   if (event) {
     if (typeof event.preventDefault === "function") event.preventDefault();
     if (typeof event.stopPropagation === "function") event.stopPropagation();
@@ -619,30 +678,29 @@ export function handleRegister(event) {
     return false;
   }
 
-  try {
-    const sanitizedUser = usernameInput.toLowerCase().replace(/[^a-z0-9_-]/g, "");
-    const sessionStudentId = sanitizedUser || usernameInput;
+  const sanitizedUser = usernameInput.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+  const sessionStudentId = sanitizedUser || usernameInput.toLowerCase();
 
-    setActiveStudentSession(sessionStudentId, usernameInput);
-    currentState.selectedStudent = sessionStudentId;
-    updateStudentHeader();
-
-    // Instantly load student local progress
-    loadStudentProgress(sessionStudentId);
-  } catch (err) {
-    console.error("[Register Error]", err);
-  } finally {
-    closeLoginOverlay();
+  const accounts = getRegisteredAccounts();
+  if (accounts[sessionStudentId]) {
+    alert(`An account with the username "${usernameInput}" already exists. Please click 'Log In' instead.`);
+    switchAuthTab('login');
+    const loginUserEl = document.getElementById("login-username");
+    if (loginUserEl) loginUserEl.value = usernameInput;
+    return false;
   }
 
-  pullProgressFromCloud(currentState.selectedStudent).then(cloudProgress => {
-    if (cloudProgress) {
-      currentState.progress = cloudProgress;
-      saveStudentProgress();
-      updateDashboard();
-      renderSkillMatrix();
-    }
-  }).catch(err => console.warn("[Register Cloud Check]", err));
+  const authHash = await hashStudentId(sessionStudentId + ":" + passwordInput);
+  saveRegisteredAccount(usernameInput, authHash);
+
+  setActiveStudentSession(sessionStudentId, usernameInput);
+  currentState.selectedStudent = sessionStudentId;
+  updateStudentHeader();
+
+  loadStudentProgress(sessionStudentId);
+  closeLoginOverlay();
+
+  syncProgressToCloud();
 
   return false;
 }
@@ -871,6 +929,7 @@ window.setModalCompetencyLevel = (level) => setModalCompetencyLevel(level, updat
 window.handleNotesInput = handleNotesInput;
 window.closeModal = closeModal;
 window.exportPDF = exportPDF;
+window.handleSignOut = handleSignOut;
 window.confirmResetProgress = confirmResetProgress;
 window.closeResetModal = closeResetModal;
 window.executeResetProgress = executeResetProgress;

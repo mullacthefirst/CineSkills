@@ -146,14 +146,81 @@ export const ACHIEVEMENT_BADGES = [
   }
 ];
 
+export function checkAchievementUnlocks() {
+  if (!currentState.selectedStudent) return;
+  const studentId = currentState.selectedStudent;
+  const storageKey = `cineskills_unlocked_achievements_${studentId}`;
+  
+  let unlockedList = [];
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (raw) unlockedList = JSON.parse(raw);
+  } catch (e) {}
+
+  let updated = false;
+  ACHIEVEMENT_BADGES.forEach(badge => {
+    const res = badge.check({}, currentState.progress);
+    if (res.unlocked && !unlockedList.includes(badge.id)) {
+      unlockedList.push(badge.id);
+      updated = true;
+      if (!currentState.isInitialLoad) {
+        showAchievementToast(badge);
+      }
+    }
+  });
+
+  if (updated) {
+    localStorage.setItem(storageKey, JSON.stringify(unlockedList));
+  }
+}
+
+export function showAchievementToast(badge) {
+  let container = document.getElementById("notification-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "notification-container";
+    container.className = "notification-container";
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement("div");
+  toast.className = "notification-toast achievement-toast";
+  toast.style.borderColor = "var(--accent-gold)";
+  toast.style.boxShadow = "0 8px 32px rgba(234, 179, 8, 0.3)";
+  toast.innerHTML = `
+    <div style="font-size: 1.8rem; margin-right: 12px;">${badge.emoji}</div>
+    <div style="flex: 1;">
+      <div style="font-weight: 700; color: var(--accent-gold); font-size: 0.9rem;">🏆 ACHIEVEMENT UNLOCKED!</div>
+      <div style="font-weight: 600; font-size: 1rem; color: #fff; margin-top: 2px;">${badge.name}</div>
+      <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">${badge.desc}</div>
+    </div>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add("show");
+  }, 50);
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 400);
+  }, 4500);
+}
+
 export function renderAchievements(categoryStats) {
   const listEl = document.getElementById("achievements-list");
   if (!listEl) return;
   listEl.innerHTML = "";
   
+  const studentId = currentState.selectedStudent || "";
+  let unlockedList = [];
+  try {
+    const raw = localStorage.getItem(`cineskills_unlocked_achievements_${studentId}`);
+    if (raw) unlockedList = JSON.parse(raw);
+  } catch (e) {}
+  
   ACHIEVEMENT_BADGES.forEach(badge => {
-    const res = badge.check(categoryStats, currentState.progress);
-    const isUnlocked = res.unlocked;
+    const res = badge.check(categoryStats || {}, currentState.progress || {});
+    const isUnlocked = unlockedList.includes(badge.id) || res.unlocked;
     const progressText = isUnlocked ? "🏆 Unlocked" : `Progress: ${res.current} / ${res.target}`;
     const statusClass = isUnlocked ? "unlocked" : "locked";
     

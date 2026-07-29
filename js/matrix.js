@@ -35,10 +35,7 @@ export function renderSkillMatrix() {
       const matchesStatus = currentState.filterStatus === "all" ||
                             currentState.filterStatus === level.toString();
                              
-      const matchesTier = currentState.filterTier === "all" ||
-                          currentState.filterTier === skill.tier.toString();
-
-      return matchesSearch && matchesStatus && matchesTier;
+      return matchesSearch && matchesStatus;
     });
 
     if (filteredSkills.length === 0) return;
