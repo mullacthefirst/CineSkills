@@ -561,6 +561,9 @@ export function handleLogin(event) {
     console.warn("[Login] Background cloud pull skipped:", err);
   });
 
+  return false;
+}
+
 export function switchAuthTab(tabName) {
   const loginForm = document.getElementById("login-form");
   const regForm = document.getElementById("register-form");
