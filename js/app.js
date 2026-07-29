@@ -1,4 +1,4 @@
-// Main Application Entry Point for CineGrade (ES6 Modules)
+// Main Application Entry Point for CineSkills (ES6 Modules)
 import { currentState, saveStudentProgress, getDirectorRank, calculateArchetype } from './state.js';
 import { renderSkillMatrix, toggleTierSection, cycleSkillLevel, openSkillDetail, setModalCompetencyLevel, handleNotesInput, closeModal } from './matrix.js';
 import { renderProfileView, savePortfolioBio, updateShowreel, openAddProjectModal, closeAddProjectModal, handleAddProjectSubmit, deletePortfolioProject, exportData, importData, exportPDF } from './profile.js';
@@ -27,38 +27,30 @@ function init() {
   // Initialize optional Supabase Cloud Sync
   initSupabase();
 
-  const savedTheme = localStorage.getItem("cinegrade_theme");
-  if (savedTheme === "light") {
-    document.body.classList.add("light-theme");
-    const toggleBtnIcon = document.querySelector("#theme-toggle-btn .menu-item-icon");
-    const toggleBtnText = document.getElementById("theme-btn-text");
-    if (toggleBtnIcon && toggleBtnText) {
-      toggleBtnIcon.textContent = "🌙";
-      toggleBtnText.textContent = "Dark Mode";
-    }
-  }
+  const savedTheme = localStorage.getItem("cineskills_theme") || "dark";
+  selectTheme(savedTheme);
 
-  const savedDyslexia = localStorage.getItem("cinegrade_dyslexia_font");
+  const savedDyslexia = localStorage.getItem("cineskills_dyslexia_font");
   if (savedDyslexia === "true") {
     document.body.classList.add("dyslexia-font");
     const btnText = document.getElementById("dyslexia-btn-text");
     if (btnText) btnText.textContent = "Standard Font";
   }
 
-  const savedAnimations = localStorage.getItem("cinegrade_disable_animations");
+  const savedAnimations = localStorage.getItem("cineskills_disable_animations");
   if (savedAnimations === "true") {
     document.body.classList.add("disable-animations");
     const btnText = document.getElementById("animations-btn-text");
     if (btnText) btnText.textContent = "Enable Animations";
   }
 
-  const savedCineTheme = localStorage.getItem("cinegrade_cine_theme") || "default";
+  const savedCineTheme = localStorage.getItem("cineskills_cine_theme") || "default";
   changeCineTheme(savedCineTheme);
 
-  const activeStudentSession = sessionStorage.getItem("cinegrade_active_student_id");
+  const activeStudentSession = sessionStorage.getItem("cineskills_active_student_id");
   if (activeStudentSession) {
     currentState.selectedStudent = activeStudentSession;
-    const activeStudentName = sessionStorage.getItem("cinegrade_active_student_name") || "Student";
+    const activeStudentName = sessionStorage.getItem("cineskills_active_student_name") || "Student";
     if (activeStudentName.includes("Alan Smithee")) {
       triggerAlanSmitheeMode();
     } else {
@@ -133,12 +125,12 @@ function init() {
 
 export function loadStudentProgress(studentId) {
   currentState.isInitialLoad = true;
-  const localKey = `cinegrade_progress_${studentId}`;
+  const localKey = `cineskills_progress_${studentId}`;
   const saved = localStorage.getItem(localKey);
   
   currentState.progress = {};
   
-  CINEGRADE_DATABASE.categories.forEach(cat => {
+  CINESKILLS_DATABASE.categories.forEach(cat => {
     cat.skills.forEach(skill => {
       currentState.progress[skill.name] = { level: 0, notes: "" };
     });
@@ -187,7 +179,7 @@ export function updateDashboard() {
   
   const categoryStats = {};
   
-  CINEGRADE_DATABASE.categories.forEach(cat => {
+  CINESKILLS_DATABASE.categories.forEach(cat => {
     categoryStats[cat.id] = { totalXp: 0, earnedXp: 0 };
     
     cat.skills.forEach(skill => {
@@ -212,7 +204,7 @@ export function updateDashboard() {
 
   earnedXp += getQuestBonusXp();
 
-  const studentName = sessionStorage.getItem("cinegrade_active_student_name") || "Student";
+  const studentName = sessionStorage.getItem("cineskills_active_student_name") || "Student";
   const displayEl = document.getElementById("stats-student-display");
   if (displayEl) displayEl.textContent = `${studentName}'s Progress`;
 
@@ -254,7 +246,7 @@ export function updateDashboard() {
   const categoryBreakdown = document.getElementById("category-breakdown");
   if (categoryBreakdown) {
     categoryBreakdown.innerHTML = "";
-    CINEGRADE_DATABASE.categories.forEach(cat => {
+    CINESKILLS_DATABASE.categories.forEach(cat => {
       const stats = categoryStats[cat.id];
       const catPct = stats.totalXp > 0 ? Math.round((stats.earnedXp / stats.totalXp) * 100) : 0;
       
@@ -310,7 +302,7 @@ function checkNewAchievements() {
   if (!currentState.selectedStudent) return;
 
   const categoryStats = {};
-  CINEGRADE_DATABASE.categories.forEach(cat => {
+  CINESKILLS_DATABASE.categories.forEach(cat => {
     categoryStats[cat.id] = { totalXp: 0, earnedXp: 0 };
     cat.skills.forEach(skill => {
       categoryStats[cat.id].totalXp += skill.xp;
@@ -330,7 +322,7 @@ function checkNewAchievements() {
     }
   });
 
-  const storageKey = `cinegrade_unlocked_achievements_${currentState.selectedStudent}`;
+  const storageKey = `cineskills_unlocked_achievements_${currentState.selectedStudent}`;
   const savedUnlockedRaw = localStorage.getItem(storageKey);
   let previouslyUnlocked = [];
   
@@ -434,22 +426,53 @@ export function toggleSettingsMenu() {
   if (menu) menu.classList.toggle("active");
 }
 
-export function toggleTheme() {
-  const isLight = document.body.classList.toggle("light-theme");
-  localStorage.setItem("cinegrade_theme", isLight ? "light" : "dark");
-  
-  const toggleBtnIcon = document.querySelector("#theme-toggle-btn .menu-item-icon");
-  const toggleBtnText = document.getElementById("theme-btn-text");
-  
-  if (toggleBtnIcon && toggleBtnText) {
-    toggleBtnIcon.textContent = isLight ? "🌙" : "☀️";
-    toggleBtnText.textContent = isLight ? "Dark Mode" : "Light Mode";
+export function toggleMobileMenu() {
+  const hamburgerBtn = document.getElementById("hamburger-btn");
+  const navDrawer = document.getElementById("nav-drawer");
+  if (hamburgerBtn) hamburgerBtn.classList.toggle("active");
+  if (navDrawer) navDrawer.classList.toggle("active");
+}
+
+export function closeMobileMenu() {
+  const hamburgerBtn = document.getElementById("hamburger-btn");
+  const navDrawer = document.getElementById("nav-drawer");
+  if (hamburgerBtn) hamburgerBtn.classList.remove("active");
+  if (navDrawer) navDrawer.classList.remove("active");
+}
+
+export function selectTheme(themeName) {
+  const validThemes = ["dark", "light", "retro"];
+  const targetTheme = validThemes.includes(themeName) ? themeName : "dark";
+
+  document.body.classList.remove("light-theme", "retro-theme");
+  if (targetTheme === "light") {
+    document.body.classList.add("light-theme");
+  } else if (targetTheme === "retro") {
+    document.body.classList.add("retro-theme");
   }
+
+  localStorage.setItem("cineskills_theme", targetTheme);
+
+  const themeBtns = document.querySelectorAll(".theme-btn-option");
+  themeBtns.forEach(btn => {
+    if (btn.getAttribute("data-theme") === targetTheme) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
 
   const profileView = document.getElementById("profile-view");
   if (profileView && profileView.classList.contains("active")) {
     renderProfileView();
   }
+}
+
+export function toggleTheme() {
+  const currentTheme = localStorage.getItem("cineskills_theme") || "dark";
+  const themes = ["dark", "light", "retro"];
+  const nextIndex = (themes.indexOf(currentTheme) + 1) % themes.length;
+  selectTheme(themes[nextIndex]);
 }
 
 export function handleLogin(event) {
@@ -466,29 +489,24 @@ export function handleLogin(event) {
 
   if (currentState.isAlanSmithee) {
     currentState.isAlanSmithee = false;
-    document.body.classList.remove("alan-smithee-active");
+    document.body.classList.remove("smithee-mode");
   }
 
-  const studentId = nameInput.toLowerCase().replace(/[^a-z0-9]/g, "") + "_" + idInput.toLowerCase().replace(/[^a-z0-9-]/g, "");
-  const activeStudentName = `${nameInput} (${idInput})`;
+  sessionStorage.setItem("cineskills_active_student_id", idInput);
+  sessionStorage.setItem("cineskills_active_student_name", nameInput);
+  currentState.selectedStudent = idInput;
 
-  currentState.selectedStudent = studentId;
-  sessionStorage.setItem("cinegrade_active_student_id", studentId);
-  sessionStorage.setItem("cinegrade_active_student_name", activeStudentName);
-  localStorage.setItem("cinegrade_student_name", nameInput);
-  localStorage.setItem("cinegrade_student_id", idInput);
+  const activeStudentDisplay = document.getElementById("active-student-display");
+  if (activeStudentDisplay) {
+    activeStudentDisplay.textContent = `👤 ${nameInput}`;
+  }
 
-  const displayEl = document.getElementById("active-student-display");
-  if (displayEl) displayEl.textContent = `👤 ${activeStudentName}`;
-
-  loadStudentProgress(studentId);
-  const loginOverlay = document.getElementById("login-overlay");
-  if (loginOverlay) loginOverlay.classList.remove("active");
-
-  document.getElementById("login-form").reset();
+  loadStudentProgress(idInput);
+  closeLoginOverlay();
 }
 
 export function switchView(viewName) {
+  closeMobileMenu();
   const matrixView = document.getElementById("matrix-view");
   const profileView = document.getElementById("profile-view");
   const gearView = document.getElementById("gear-view");
@@ -575,14 +593,14 @@ export function switchAchievementsTab(tabType) {
 
 export function toggleDyslexiaFont() {
   const isDyslexia = document.body.classList.toggle("dyslexia-font");
-  localStorage.setItem("cinegrade_dyslexia_font", isDyslexia ? "true" : "false");
+  localStorage.setItem("cineskills_dyslexia_font", isDyslexia ? "true" : "false");
   const btnText = document.getElementById("dyslexia-btn-text");
   if (btnText) btnText.textContent = isDyslexia ? "Standard Font" : "Dyslexia Font";
 }
 
 export function toggleAnimations() {
   const isDisable = document.body.classList.toggle("disable-animations");
-  localStorage.setItem("cinegrade_disable_animations", isDisable ? "true" : "false");
+  localStorage.setItem("cineskills_disable_animations", isDisable ? "true" : "false");
   const btnText = document.getElementById("animations-btn-text");
   if (btnText) btnText.textContent = isDisable ? "Enable Animations" : "Disable Animations";
 }
@@ -592,21 +610,21 @@ export function changeCineTheme(themeValue) {
   if (themeValue && themeValue !== "default") {
     document.body.classList.add(`theme-${themeValue}`);
   }
-  localStorage.setItem("cinegrade_cine_theme", themeValue);
+  localStorage.setItem("cineskills_cine_theme", themeValue);
   const selectEl = document.getElementById("cine-theme-select");
   if (selectEl) selectEl.value = themeValue;
 }
 
 export function setMatrixLayout(mode) {
   currentState.matrixLayout = mode;
-  localStorage.setItem("cinegrade_matrix_layout", mode);
+  localStorage.setItem("cineskills_matrix_layout", mode);
   renderSkillMatrix();
 }
 
 export function checkBackupMilestones(pct) {
   if (!currentState.selectedStudent) return;
   const milestones = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
-  const storageKey = `cinegrade_notified_milestones_${currentState.selectedStudent}`;
+  const storageKey = `cineskills_notified_milestones_${currentState.selectedStudent}`;
   const savedMilestonesRaw = localStorage.getItem(storageKey);
   let notifiedMilestones = [];
   if (savedMilestonesRaw) {
@@ -665,14 +683,14 @@ export function closeResetModal() {
 export function executeResetProgress() {
   if (!currentState.selectedStudent) return;
   const studentId = currentState.selectedStudent;
-  localStorage.removeItem(`cinegrade_progress_${studentId}`);
-  localStorage.removeItem(`cinegrade_history_${studentId}`);
-  localStorage.removeItem(`cinegrade_unlocked_achievements_${studentId}`);
-  localStorage.removeItem(`cinegrade_notified_milestones_${studentId}`);
-  localStorage.removeItem(`cinegrade_portfolio_bio_${studentId}`);
-  localStorage.removeItem(`cinegrade_portfolio_showreel_${studentId}`);
-  localStorage.removeItem(`cinegrade_portfolio_projects_${studentId}`);
-  localStorage.removeItem(`cinegrade_gear_bookings_${studentId}`);
+  localStorage.removeItem(`cineskills_progress_${studentId}`);
+  localStorage.removeItem(`cineskills_history_${studentId}`);
+  localStorage.removeItem(`cineskills_unlocked_achievements_${studentId}`);
+  localStorage.removeItem(`cineskills_notified_milestones_${studentId}`);
+  localStorage.removeItem(`cineskills_portfolio_bio_${studentId}`);
+  localStorage.removeItem(`cineskills_portfolio_showreel_${studentId}`);
+  localStorage.removeItem(`cineskills_portfolio_projects_${studentId}`);
+  localStorage.removeItem(`cineskills_gear_bookings_${studentId}`);
   
   closeResetModal();
   loadStudentProgress(studentId);
@@ -697,10 +715,10 @@ export function triggerAlanSmitheeMode() {
 export function updateStudentHeader() {
   if (!currentState.selectedStudent) return;
   const studentId = currentState.selectedStudent;
-  const nameInput = localStorage.getItem("cinegrade_student_name") || "Student";
-  const idInput = localStorage.getItem("cinegrade_student_id") || "";
+  const nameInput = localStorage.getItem("cineskills_student_name") || "Student";
+  const idInput = localStorage.getItem("cineskills_student_id") || "";
   const activeStudentName = idInput ? `${nameInput} (${idInput})` : nameInput;
-  const emoji = localStorage.getItem(`cinegrade_emoji_${studentId}`) || "🎬";
+  const emoji = localStorage.getItem(`cineskills_emoji_${studentId}`) || "🎬";
   
   const activeStudentDisplay = document.getElementById("active-student-display");
   if (activeStudentDisplay) activeStudentDisplay.textContent = `${emoji} ${activeStudentName}`;
@@ -714,7 +732,7 @@ export function toggleEmojiPicker(event) {
 
 export function selectProfileEmoji(emoji) {
   if (!currentState.selectedStudent) return;
-  localStorage.setItem(`cinegrade_emoji_${currentState.selectedStudent}`, emoji);
+  localStorage.setItem(`cineskills_emoji_${currentState.selectedStudent}`, emoji);
   const popover = document.getElementById("emoji-picker-popover");
   if (popover) popover.classList.remove("active");
   updateStudentHeader();
@@ -726,6 +744,9 @@ window.switchChart = switchChart;
 window.switchAchievementsTab = switchAchievementsTab;
 window.toggleSettingsMenu = toggleSettingsMenu;
 window.toggleTheme = toggleTheme;
+window.selectTheme = selectTheme;
+window.toggleMobileMenu = toggleMobileMenu;
+window.closeMobileMenu = closeMobileMenu;
 window.toggleDyslexiaFont = toggleDyslexiaFont;
 window.toggleAnimations = toggleAnimations;
 window.changeCineTheme = changeCineTheme;
@@ -777,7 +798,7 @@ window.promptInstallPWA = function() {
       if (btn) btn.style.display = 'none';
     });
   } else {
-    alert("To install CineGrade on iOS, Android, or Windows:\n\n1. Tap your browser menu or share icon (⬆️)\n2. Select 'Add to Home Screen' or 'Install App'.");
+    alert("To install CineSkills on iOS, Android, or Windows:\n\n1. Tap your browser menu or share icon (⬆️)\n2. Select 'Add to Home Screen' or 'Install App'.");
   }
 };
 

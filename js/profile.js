@@ -5,7 +5,7 @@ import { renderAchievements, getQuestBonusXp } from './quests.js';
 
 export function savePortfolioBio() {
   const studentId = currentState.selectedStudent || "callum_oco26000271";
-  const bioKey = `cinegrade_portfolio_bio_${studentId}`;
+  const bioKey = `cineskills_portfolio_bio_${studentId}`;
   const portfolioBio = document.getElementById("portfolio-bio");
   if (portfolioBio) {
     const bioVal = portfolioBio.value;
@@ -15,7 +15,7 @@ export function savePortfolioBio() {
 
 export function updateShowreel() {
   const studentId = currentState.selectedStudent || "callum_oco26000271";
-  const showreelKey = `cinegrade_portfolio_showreel_${studentId}`;
+  const showreelKey = `cineskills_portfolio_showreel_${studentId}`;
   const showreelUrlInput = document.getElementById("showreel-url");
   if (showreelUrlInput) {
     const urlVal = showreelUrlInput.value.trim();
@@ -71,7 +71,7 @@ export function renderShowreelPlayer(url) {
 
 export function renderProjectsList() {
   const studentId = currentState.selectedStudent || "callum_oco26000271";
-  const key = `cinegrade_portfolio_projects_${studentId}`;
+  const key = `cineskills_portfolio_projects_${studentId}`;
   const projects = JSON.parse(localStorage.getItem(key) || "[]");
   
   const projCountEl = document.getElementById("dossier-projects-count");
@@ -135,7 +135,7 @@ export function deletePortfolioProject(projId) {
   if (!confirm("Are you sure you want to delete this project?")) return;
   
   const studentId = currentState.selectedStudent || "callum_oco26000271";
-  const key = `cinegrade_portfolio_projects_${studentId}`;
+  const key = `cineskills_portfolio_projects_${studentId}`;
   let projects = JSON.parse(localStorage.getItem(key) || "[]");
   projects = projects.filter(p => p.id !== projId);
   localStorage.setItem(key, JSON.stringify(projects));
@@ -147,7 +147,7 @@ export function openAddProjectModal() {
   const selectGrid = document.getElementById("project-skills-select");
   if (selectGrid) {
     selectGrid.innerHTML = "";
-    CINEGRADE_DATABASE.categories.forEach(cat => {
+    CINESKILLS_DATABASE.categories.forEach(cat => {
       cat.skills.forEach(skill => {
         const id = `chk-skill-${skill.name.replace(/\s+/g, '-')}`;
         selectGrid.innerHTML += `
@@ -194,7 +194,7 @@ export function handleAddProjectSubmit(e) {
   };
   
   const studentId = currentState.selectedStudent || "callum_oco26000271";
-  const key = `cinegrade_portfolio_projects_${studentId}`;
+  const key = `cineskills_portfolio_projects_${studentId}`;
   const projects = JSON.parse(localStorage.getItem(key) || "[]");
   projects.push(newProject);
   localStorage.setItem(key, JSON.stringify(projects));
@@ -204,8 +204,8 @@ export function handleAddProjectSubmit(e) {
 }
 
 export function renderProfileView() {
-  const rawName = localStorage.getItem("cinegrade_student_name") || "Callum";
-  const rawId = localStorage.getItem("cinegrade_student_id") || "OCO26000271";
+  const rawName = localStorage.getItem("cineskills_student_name") || "Callum";
+  const rawId = localStorage.getItem("cineskills_student_id") || "OCO26000271";
   
   const dossierStudentName = document.getElementById("dossier-student-name");
   const dossierStudentId = document.getElementById("dossier-student-id");
@@ -225,7 +225,7 @@ export function renderProfileView() {
   let totalSkills = 0;
   const categoryStats = {};
 
-  CINEGRADE_DATABASE.categories.forEach(cat => {
+  CINESKILLS_DATABASE.categories.forEach(cat => {
     categoryStats[cat.id] = { totalXp: 0, earnedXp: 0 };
     cat.skills.forEach(skill => {
       totalSkills++;
@@ -290,7 +290,7 @@ export function renderProfileView() {
     evidenceLogList.innerHTML = "";
     let hasEvidence = false;
     
-    CINEGRADE_DATABASE.categories.forEach(cat => {
+    CINESKILLS_DATABASE.categories.forEach(cat => {
       cat.skills.forEach(skill => {
         const skillState = currentState.progress[skill.name];
         if (skillState && skillState.notes && skillState.notes.trim() !== "") {
@@ -329,13 +329,13 @@ export function renderProfileView() {
   }
 
   const studentId = currentState.selectedStudent || "callum_oco26000271";
-  const bioKey = `cinegrade_portfolio_bio_${studentId}`;
+  const bioKey = `cineskills_portfolio_bio_${studentId}`;
   const portfolioBio = document.getElementById("portfolio-bio");
   if (portfolioBio) {
     portfolioBio.value = localStorage.getItem(bioKey) || "";
   }
   
-  const showreelKey = `cinegrade_portfolio_showreel_${studentId}`;
+  const showreelKey = `cineskills_portfolio_showreel_${studentId}`;
   const savedShowreel = localStorage.getItem(showreelKey) || "";
   const showreelUrlInput = document.getElementById("showreel-url");
   if (showreelUrlInput) {
@@ -351,7 +351,7 @@ export function exportData() {
     alert("No student session active to export.");
     return;
   }
-  const studentName = sessionStorage.getItem("cinegrade_active_student_name") || "Student";
+  const studentName = sessionStorage.getItem("cineskills_active_student_name") || "Student";
   const progress = currentState.progress;
 
   const exportPayload = {
@@ -363,7 +363,7 @@ export function exportData() {
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportPayload, null, 2));
   const downloadAnchor = document.createElement("a");
   downloadAnchor.setAttribute("href", dataStr);
-  downloadAnchor.setAttribute("download", `CineGrade_${studentName.replace(/[^a-zA-Z0-9]/g, "_")}_Progress.json`);
+  downloadAnchor.setAttribute("download", `CineSkills_${studentName.replace(/[^a-zA-Z0-9]/g, "_")}_Progress.json`);
   document.body.appendChild(downloadAnchor);
   downloadAnchor.click();
   downloadAnchor.remove();
@@ -377,15 +377,15 @@ export function importData(event, loadStudentProgressFn) {
       const imported = JSON.parse(e.target.result);
       
       if (imported.studentId && imported.progress) {
-        sessionStorage.setItem("cinegrade_active_student_id", imported.studentId);
-        sessionStorage.setItem("cinegrade_active_student_name", imported.studentName || "Student");
-        localStorage.setItem(`cinegrade_progress_${imported.studentId}`, JSON.stringify(imported.progress));
+        sessionStorage.setItem("cineskills_active_student_id", imported.studentId);
+        sessionStorage.setItem("cineskills_active_student_name", imported.studentName || "Student");
+        localStorage.setItem(`cineskills_progress_${imported.studentId}`, JSON.stringify(imported.progress));
         
         if (imported.studentName) {
           const parts = imported.studentName.match(/^(.*?)\s*\((.*?)\)$/);
           if (parts) {
-            localStorage.setItem("cinegrade_student_name", parts[1].trim());
-            localStorage.setItem("cinegrade_student_id", parts[2].trim());
+            localStorage.setItem("cineskills_student_name", parts[1].trim());
+            localStorage.setItem("cineskills_student_id", parts[2].trim());
           }
         }
         
@@ -407,14 +407,14 @@ export function importData(event, loadStudentProgressFn) {
 }
 
 export function exportPDF() {
-  const studentName = sessionStorage.getItem("cinegrade_active_student_name") || "Student";
+  const studentName = sessionStorage.getItem("cineskills_active_student_name") || "Student";
   
   let earnedXp = 0;
   let maxPossibleXp = 0;
   let completedCount = 0;
   let totalSkillsCount = 0;
   
-  CINEGRADE_DATABASE.categories.forEach(cat => {
+  CINESKILLS_DATABASE.categories.forEach(cat => {
     cat.skills.forEach(skill => {
       maxPossibleXp += skill.xp;
       totalSkillsCount++;
@@ -433,7 +433,7 @@ export function exportPDF() {
   
   let printHtml = `
     <div class="print-header">
-      <div class="print-title">CineGrade Report</div>
+      <div class="print-title">CineSkills Report</div>
       <div class="print-subtitle">The Creative Media Skill Tracker & Competency Record</div>
       
       <div class="print-meta-grid">
@@ -445,7 +445,7 @@ export function exportPDF() {
     </div>
   `;
   
-  CINEGRADE_DATABASE.categories.forEach(cat => {
+  CINESKILLS_DATABASE.categories.forEach(cat => {
     let categoryHtml = `
       <div class="print-category-section">
         <div class="print-category-header">${cat.emoji} ${cat.name}</div>

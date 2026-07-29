@@ -1,4 +1,4 @@
-// State management, constants, and persistence helpers for CineGrade
+// State management, constants, and persistence helpers for CineSkills
 
 export const TIER_NAMES = { 1: "Beginner", 2: "Intermediate", 3: "Master" };
 
@@ -10,7 +10,7 @@ export let currentState = {
   filterStatus: "all",
   filterTier: "all",
   isInitialLoad: true,
-  matrixLayout: localStorage.getItem("cinegrade_matrix_layout") || "grid",
+  matrixLayout: localStorage.getItem("cineskills_matrix_layout") || "grid",
   isAlanSmithee: false
 };
 
@@ -119,7 +119,7 @@ export function calculateArchetype(categoryStats, overallPct) {
 }
 
 export function saveStudentProgress() {
-  const localKey = `cinegrade_progress_${currentState.selectedStudent}`;
+  const localKey = `cineskills_progress_${currentState.selectedStudent}`;
   localStorage.setItem(localKey, JSON.stringify(currentState.progress));
   if (typeof window.syncProgressToCloud === 'function') {
     window.syncProgressToCloud();

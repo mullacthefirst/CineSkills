@@ -1,6 +1,6 @@
-# 🌐 Free Web Hosting & Classroom Deployment Guide — CineGrade
+# 🌐 Free Web Hosting & Classroom Deployment Guide — CineSkills
 
-Publish CineGrade to a free public URL so 20+ students can open it on their phones, tablets, or school PCs without downloading code files or installing local web servers.
+Publish CineSkills to a free public URL so 20+ students can open it on their phones, tablets, or school PCs without downloading code files or installing local web servers.
 
 ---
 
@@ -8,16 +8,16 @@ Publish CineGrade to a free public URL so 20+ students can open it on their phon
 
 ### Step 1: Create a GitHub Repository
 1. Create a free account at [github.com](https://github.com) (if you don't already have one).
-2. Click **New Repository** and name it `cinegrade`.
+2. Click **New Repository** and name it `cineskills`.
 3. Choose **Public** and click **Create repository**.
 
 ### Step 2: Upload Application Files
 1. Open the repository on GitHub and click **Add file** -> **Upload files**.
-2. Drag and drop all files from your local [`App`](file:///g:/My%20Drive/Obsidian%20Vault/02_Creative%20Media%20Production/04_CineGrade/App) directory into the GitHub upload area:
+2. Drag and drop all files from your local [`App`](file:///g:/My%20Drive/Obsidian%20Vault/02_Creative%20Media%20Production/04_CineSkills/App) directory into the GitHub upload area:
    - `index.html`
    - `style.css`
    - `data.js`
-   - `cinegrade_db.json`
+   - `cineskills_db.json`
    - `manifest.json`
    - `sw.js`
    - `icons/` folder (`icon-192.png`, `icon-512.png`)
@@ -29,7 +29,7 @@ Publish CineGrade to a free public URL so 20+ students can open it on their phon
 2. Under **Build and deployment** -> **Source**, select **Deploy from a branch**.
 3. Under **Branch**, select `main` (or `master`) and click **Save**.
 4. Within 1-2 minutes, GitHub will generate your free live URL:
-   `https://<your-username>.github.io/cinegrade`
+   `https://<your-username>.github.io/cineskills`
 
 ---
 
@@ -37,9 +37,9 @@ Publish CineGrade to a free public URL so 20+ students can open it on their phon
 
 1. Go to [vercel.com](https://vercel.com) and create a free account.
 2. Install Vercel CLI or use their web dashboard.
-3. Drag the [`App`](file:///g:/My%20Drive/Obsidian%20Vault/02_Creative%20Media%20Production/04_CineGrade/App) folder onto Vercel's import screen.
+3. Drag the [`App`](file:///g:/My%20Drive/Obsidian%20Vault/02_Creative%20Media%20Production/04_CineSkills/App) folder onto Vercel's import screen.
 4. Click **Deploy**. Vercel will instantly issue a free HTTPS URL:
-   `https://cinegrade.vercel.app`
+   `https://cineskills.vercel.app`
 
 ---
 
@@ -62,9 +62,9 @@ Once opened, the Service Worker caches all skills, icons, and CSS locally. Stude
 
 To view real-time progress for all 20+ students in an **Educator Matrix Overview**:
 1. Create a free account at [supabase.com](https://supabase.com) ($0/mo free tier).
-2. Create a table named `cinegrade_student_progress`:
+2. Create a table named `cineskills_student_progress`:
    ```sql
-   create table cinegrade_student_progress (
+   create table cineskills_student_progress (
      student_id text primary key,
      student_name text,
      progress_json jsonb,
@@ -73,4 +73,4 @@ To view real-time progress for all 20+ students in an **Educator Matrix Overview
      updated_at timestamp with time zone default timezone('utc'::text, now())
    );
    ```
-3. In CineGrade, open **⚙️ Settings** -> **👩‍🏫 Educator Class View** -> **⚙️ Cloud Setup** and enter your Supabase URL & Anon Key.
+3. In CineSkills, open **⚙️ Settings** -> **👩‍🏫 Educator Class View** -> **⚙️ Cloud Setup** and enter your Supabase URL & Anon Key.

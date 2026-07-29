@@ -1,7 +1,7 @@
 {
-  "name": "cinegrade-app",
+  "name": "cineskills-app",
   "version": "1.0.0",
-  "description": "CineGrade - The Creative Media Skill Tracker",
+  "description": "CineSkills - The Creative Media Skill Tracker",
   "main": "index.html",
   "scripts": {
     "start": "npx -y serve ./"

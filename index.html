@@ -14,12 +14,8 @@
 </head>
 <body>
 
-  <!-- Floating Aurora Background Shapes -->
-  <div class="aurora-bg">
-    <div class="blob blob-lightblue"></div>
-    <div class="blob blob-blue"></div>
-    <div class="blob blob-pink"></div>
-  </div>
+  <!-- Background Layer -->
+  <div class="aurora-bg"></div>
 
   <!-- Fixed Top Navbar -->
   <header class="navbar">
@@ -28,65 +24,84 @@
       <span class="logo-subtitle">The Creative Media Skill Tracker</span>
     </div>
 
-    <!-- Navigation Tabs -->
-    <div class="nav-tabs">
-      <button class="nav-tab active" onclick="switchView('profile')">Student Profile</button>
-      <button class="nav-tab" onclick="switchView('matrix')">Skills Matrix</button>
-      <button class="nav-tab" onclick="switchView('gear')">Gear Locker</button>
-      <button class="nav-tab" onclick="switchView('inspiration')">Inspiration Hub</button>
-      <button class="nav-tab" onclick="switchView('quests')">Daily Quests</button>
-    </div>
-    
-    <div class="nav-controls">
-      <span id="active-student-display" class="student-badge" style="cursor: pointer;" onclick="openLoginOverlay()" title="Click to edit student details">👤 Sign In / Switch Profile</span>
-      
-      <!-- Settings Menu -->
-      <div class="settings-menu-container">
-        <button id="settings-cog-btn" class="settings-cog-btn" aria-label="Settings" onclick="toggleSettingsMenu()">⚙️</button>
-        <div id="settings-dropdown" class="settings-dropdown">
-          <button id="switch-student-menu-btn" class="menu-item" onclick="openLoginOverlay()">
-            <span class="menu-item-icon">👤</span> Switch Student Profile
-          </button>
-          <button id="theme-toggle-btn" class="menu-item" onclick="toggleTheme()">
-            <span class="menu-item-icon">☀️</span> <span id="theme-btn-text">Light Mode</span>
-          </button>
-          <button id="pwa-install-btn" class="menu-item" onclick="promptInstallPWA()" style="display: none;">
-            <span class="menu-item-icon">📲</span> Install App (PWA)
-          </button>
-          <button id="teacher-view-btn" class="menu-item" onclick="openTeacherDashboardModal()">
-            <span class="menu-item-icon">👩‍🏫</span> Educator Class View
-          </button>
-          <hr class="menu-divider">
-          <button id="export-btn" class="menu-item">
-            <span class="menu-item-icon">📤</span> Export JSON
-          </button>
-          <div class="menu-item import-menu-wrapper">
-            <span class="menu-item-icon">📥</span> Import JSON
-            <input type="file" id="import-file" accept=".json">
-          </div>
-          <button id="export-pdf-btn" class="menu-item" onclick="exportPDF()">
-            <span class="menu-item-icon">📄</span> Export PDF
-          </button>
-          <button id="reset-progress-btn" class="menu-item text-danger" onclick="confirmResetProgress()" style="color: var(--color-locked);">
-            <span class="menu-item-icon">⚠️</span> Reset Progress
-          </button>
-          <hr class="menu-divider">
-          <div class="menu-section-header">Accessibility</div>
-          <button id="dyslexia-font-btn" class="menu-item" onclick="toggleDyslexiaFont()">
-            <span class="menu-item-icon">🔠</span> <span id="dyslexia-btn-text">Dyslexia Font</span>
-          </button>
-          <button id="disable-animations-btn" class="menu-item" onclick="toggleAnimations()">
-            <span class="menu-item-icon">⚡</span> <span id="animations-btn-text">Disable Animations</span>
-          </button>
+    <!-- Hamburger Menu Toggle for Mobile -->
+    <button id="hamburger-btn" class="hamburger-btn" aria-label="Toggle navigation" onclick="toggleMobileMenu()">
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+    </button>
 
-          <div class="menu-item-select-container" style="margin-top: 8px;">
-            <span class="menu-item-icon">🎬</span>
-            <select id="cine-theme-select" class="menu-select" onchange="changeCineTheme(this.value)" aria-label="Select Cinematic Theme">
-              <option value="default">Default Theme</option>
-              <option value="technicolor">Technicolor 1950s</option>
-              <option value="cyberpunk">Cyberpunk Neon</option>
-              <option value="noir">Classic Noir</option>
-            </select>
+    <!-- Responsive Navigation Container -->
+    <div id="nav-drawer" class="nav-drawer">
+      <!-- Navigation Tabs -->
+      <nav class="nav-tabs" aria-label="Main Navigation">
+        <button class="nav-tab active" onclick="switchView('profile')">Student Profile</button>
+        <button class="nav-tab" onclick="switchView('matrix')">Skills Matrix</button>
+        <button class="nav-tab" onclick="switchView('gear')">Gear Locker</button>
+        <button class="nav-tab" onclick="switchView('inspiration')">Inspiration Hub</button>
+        <button class="nav-tab" onclick="switchView('quests')">Daily Quests</button>
+      </nav>
+      
+      <div class="nav-controls">
+        <span id="active-student-display" class="student-badge" style="cursor: pointer;" onclick="openLoginOverlay()" title="Click to edit student details">👤 Sign In / Switch Profile</span>
+        
+        <!-- Settings Menu -->
+        <div class="settings-menu-container">
+          <button id="settings-cog-btn" class="settings-cog-btn" aria-label="Settings" onclick="toggleSettingsMenu()">⚙️</button>
+          <div id="settings-dropdown" class="settings-dropdown">
+            <button id="switch-student-menu-btn" class="menu-item" onclick="openLoginOverlay()">
+              <span class="menu-item-icon">👤</span> Switch Student Profile
+            </button>
+            <div class="menu-section-header">Appearance Theme</div>
+            <div class="theme-options-group">
+              <button class="theme-btn-option" data-theme="dark" onclick="selectTheme('dark')">
+                <span class="theme-icon">🌙</span> Dark
+              </button>
+              <button class="theme-btn-option" data-theme="light" onclick="selectTheme('light')">
+                <span class="theme-icon">☀️</span> Light
+              </button>
+              <button class="theme-btn-option" data-theme="retro" onclick="selectTheme('retro')">
+                <span class="theme-icon">📜</span> Retro
+              </button>
+            </div>
+            <button id="pwa-install-btn" class="menu-item" onclick="promptInstallPWA()" style="display: none;">
+              <span class="menu-item-icon">📲</span> Install App (PWA)
+            </button>
+            <button id="teacher-view-btn" class="menu-item" onclick="openTeacherDashboardModal()">
+              <span class="menu-item-icon">👩‍🏫</span> Educator Class View
+            </button>
+            <hr class="menu-divider">
+            <button id="export-btn" class="menu-item">
+              <span class="menu-item-icon">📤</span> Export JSON
+            </button>
+            <div class="menu-item import-menu-wrapper">
+              <span class="menu-item-icon">📥</span> Import JSON
+              <input type="file" id="import-file" accept=".json">
+            </div>
+            <button id="export-pdf-btn" class="menu-item" onclick="exportPDF()">
+              <span class="menu-item-icon">📄</span> Export PDF
+            </button>
+            <button id="reset-progress-btn" class="menu-item text-danger" onclick="confirmResetProgress()" style="color: var(--color-locked);">
+              <span class="menu-item-icon">⚠️</span> Reset Progress
+            </button>
+            <hr class="menu-divider">
+            <div class="menu-section-header">Accessibility</div>
+            <button id="dyslexia-font-btn" class="menu-item" onclick="toggleDyslexiaFont()">
+              <span class="menu-item-icon">🔠</span> <span id="dyslexia-btn-text">Dyslexia Font</span>
+            </button>
+            <button id="disable-animations-btn" class="menu-item" onclick="toggleAnimations()">
+              <span class="menu-item-icon">⚡</span> <span id="animations-btn-text">Disable Animations</span>
+            </button>
+
+            <div class="menu-item-select-container" style="margin-top: 8px;">
+              <span class="menu-item-icon">🎬</span>
+              <select id="cine-theme-select" class="menu-select" onchange="changeCineTheme(this.value)" aria-label="Select Cinematic Accent">
+                <option value="default">Default Accent</option>
+                <option value="technicolor">Technicolor 1950s</option>
+                <option value="cyberpunk">Cyberpunk Neon</option>
+                <option value="noir">Classic Noir</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -175,7 +190,7 @@
       </section>
 
       <!-- Page Main Heading -->
-      <h1 style="display:none;">CineGrade Skills Matrix</h1>
+      <h1 style="display:none;">CineSkills Skills Matrix</h1>
 
       <!-- Skills Matrix Grid -->
       <section id="skills-grid" class="matrix-container">
@@ -394,7 +409,7 @@
         <!-- Inspiration Header -->
         <div class="glass-panel" style="margin-bottom: 24px;">
           <h3 style="font-size: 1.5rem; display: flex; align-items: center; gap: 8px;">✨ Inspiration Hub</h3>
-          <p class="section-subtitle">Study real-world cinematic techniques and discover the exact CineGrade competencies behind iconic shots.</p>
+          <p class="section-subtitle">Study real-world cinematic techniques and discover the exact CineSkills competencies behind iconic shots.</p>
         </div>
 
         <!-- Daily Inspiration / Personalised Feed -->
@@ -431,7 +446,7 @@
   <div id="login-overlay" class="modal-overlay">
     <div class="modal-content login-card">
       <button id="close-login-btn" class="close-btn" aria-label="Close modal" onclick="closeLoginOverlay()" style="display: none;">&times;</button>
-      <h2 class="login-title">CineGrade Access</h2>
+      <h2 class="login-title">CineSkills Access</h2>
       <p class="login-subtitle">Please enter your details to load your competency matrix.</p>
       
       <form id="login-form" onsubmit="handleLogin(event)">

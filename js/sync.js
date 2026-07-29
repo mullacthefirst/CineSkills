@@ -1,17 +1,17 @@
-// CineGrade Cloud Sync & Teacher Dashboard System (Supabase / Free Tier Sync)
+// CineSkills Cloud Sync & Teacher Dashboard System (Supabase / Free Tier Sync)
 import { currentState, saveStudentProgress } from './state.js';
 
 // Default Classroom Supabase Credentials (Pre-configured by Lecturer)
 export const DEFAULT_SUPABASE_URL = "https://xronqdapgcqezmwrwdap.supabase.co";
 export const DEFAULT_SUPABASE_KEY = "sb_publishable_sAwlb2pRYhg8ffYhMFDrEA_eyO_S8_4";
 
-let SUPABASE_URL = localStorage.getItem("cinegrade_supabase_url") || DEFAULT_SUPABASE_URL;
-let SUPABASE_KEY = localStorage.getItem("cinegrade_supabase_key") || DEFAULT_SUPABASE_KEY;
+let SUPABASE_URL = localStorage.getItem("cineskills_supabase_url") || DEFAULT_SUPABASE_URL;
+let SUPABASE_KEY = localStorage.getItem("cineskills_supabase_key") || DEFAULT_SUPABASE_KEY;
 let supabaseClient = null;
 
 export function initSupabase() {
-  let rawUrl = localStorage.getItem("cinegrade_supabase_url") || DEFAULT_SUPABASE_URL;
-  let rawKey = localStorage.getItem("cinegrade_supabase_key") || DEFAULT_SUPABASE_KEY;
+  let rawUrl = localStorage.getItem("cineskills_supabase_url") || DEFAULT_SUPABASE_URL;
+  let rawKey = localStorage.getItem("cineskills_supabase_key") || DEFAULT_SUPABASE_KEY;
 
   // Clean trailing /rest/v1 or trailing slashes if present
   if (rawUrl) {
@@ -52,13 +52,13 @@ export function syncProgressToCloud() {
       return;
     }
 
-    const studentName = sessionStorage.getItem("cinegrade_active_student_name") || "Student";
+    const studentName = sessionStorage.getItem("cineskills_active_student_name") || "Student";
     const progress = currentState.progress || {};
 
     let earnedXp = 0;
     let masteredCount = 0;
-    if (window.CINEGRADE_DATABASE && window.CINEGRADE_DATABASE.categories) {
-      window.CINEGRADE_DATABASE.categories.forEach(cat => {
+    if (window.CINESKILLS_DATABASE && window.CINESKILLS_DATABASE.categories) {
+      window.CINESKILLS_DATABASE.categories.forEach(cat => {
         cat.skills.forEach(skill => {
           const state = progress[skill.name];
           if (state && state.level === 2) {
@@ -145,19 +145,19 @@ function getLocalTeacherClassroomData() {
 
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key && key.startsWith("cinegrade_progress_")) {
-      const studentId = key.replace("cinegrade_progress_", "");
+    if (key && key.startsWith("cineskills_progress_")) {
+      const studentId = key.replace("cineskills_progress_", "");
       try {
         const progress = JSON.parse(localStorage.getItem(key)) || {};
 
         let studentName = studentId.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
         if (studentId === currentState.selectedStudent) {
-          studentName = sessionStorage.getItem("cinegrade_active_student_name") || studentName;
+          studentName = sessionStorage.getItem("cineskills_active_student_name") || studentName;
         }
 
         let xp = 0;
         let mastered = 0;
-        CINEGRADE_DATABASE.categories.forEach(cat => {
+        CINESKILLS_DATABASE.categories.forEach(cat => {
           cat.skills.forEach(s => {
             if (progress[s.name] && progress[s.name].level === 2) {
               xp += s.xp;
@@ -184,7 +184,7 @@ function getLocalTeacherClassroomData() {
 
   if (studentsList.length === 0) {
     const currentStudentId = currentState.selectedStudent || "student";
-    const studentName = sessionStorage.getItem("cinegrade_active_student_name") || "Callum";
+    const studentName = sessionStorage.getItem("cineskills_active_student_name") || "Callum";
     studentsList.push({
       student_id: currentStudentId,
       student_name: studentName,
@@ -249,7 +249,7 @@ export function updateCloudSyncStatusIndicator(status) {
 
 // Render Teacher / Educator Dashboard Modal
 export async function openTeacherDashboardModal() {
-  const storedPin = localStorage.getItem("cinegrade_teacher_pin") || "1234";
+  const storedPin = localStorage.getItem("cineskills_teacher_pin") || "1234";
   const inputPin = prompt("🔒 Educator Security Check:\nPlease enter the Educator Passcode to view class records (Default: 1234):");
 
   if (inputPin === null) return;
@@ -338,9 +338,9 @@ export async function openTeacherDashboardModal() {
 }
 
 export function configureCloudSyncPrompt() {
-  const currentUrl = localStorage.getItem("cinegrade_supabase_url") || "";
-  const currentKey = localStorage.getItem("cinegrade_supabase_key") || "";
-  const currentPin = localStorage.getItem("cinegrade_teacher_pin") || "1234";
+  const currentUrl = localStorage.getItem("cineskills_supabase_url") || "";
+  const currentKey = localStorage.getItem("cineskills_supabase_key") || "";
+  const currentPin = localStorage.getItem("cineskills_teacher_pin") || "1234";
 
   const pin = prompt("Set your Educator Passcode (Default: 1234):", currentPin);
   if (pin === null) return;
@@ -349,9 +349,9 @@ export function configureCloudSyncPrompt() {
   const key = prompt("Enter your free Supabase Anon Key:", currentKey);
   if (key === null) return;
 
-  localStorage.setItem("cinegrade_teacher_pin", pin.trim() || "1234");
-  localStorage.setItem("cinegrade_supabase_url", url.trim());
-  localStorage.setItem("cinegrade_supabase_key", key.trim());
+  localStorage.setItem("cineskills_teacher_pin", pin.trim() || "1234");
+  localStorage.setItem("cineskills_supabase_url", url.trim());
+  localStorage.setItem("cineskills_supabase_key", key.trim());
 
   SUPABASE_URL = url.trim();
   SUPABASE_KEY = key.trim();

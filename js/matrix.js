@@ -21,7 +21,7 @@ export function renderSkillMatrix() {
     }
   }
 
-  CINEGRADE_DATABASE.categories.forEach(cat => {
+  CINESKILLS_DATABASE.categories.forEach(cat => {
     const filteredSkills = cat.skills.filter(skill => {
       const matchesSearch = skill.name.toLowerCase().includes(currentState.searchQuery) ||
                             skill.purpose.toLowerCase().includes(currentState.searchQuery);
@@ -202,7 +202,7 @@ export function cycleSkillLevel(event, categoryId, skillName, updateDashboardFn)
 }
 
 export function openSkillDetail(categoryId, skillName) {
-  const cat = CINEGRADE_DATABASE.categories.find(c => c.id === categoryId);
+  const cat = CINESKILLS_DATABASE.categories.find(c => c.id === categoryId);
   const skill = cat.skills.find(s => s.name === skillName);
   
   activeSkillRef = skill;

@@ -1,9 +1,9 @@
-// Canvas chart renderers and progress timeline history for CineGrade
+// Canvas chart renderers and progress timeline history for CineSkills
 import { currentState } from './state.js';
 
 export function logProgressHistory(pct) {
   if (!currentState.selectedStudent) return;
-  const historyKey = `cinegrade_history_${currentState.selectedStudent}`;
+  const historyKey = `cineskills_history_${currentState.selectedStudent}`;
   let history = [];
   try {
     const saved = localStorage.getItem(historyKey);
@@ -40,17 +40,17 @@ export function drawRadarChart(categoryStats) {
   const cy = canvas.height / 2;
   const radius = Math.min(canvas.width, canvas.height) / 2 * 0.55;
   
-  const categories = CINEGRADE_DATABASE.categories;
+  const categories = CINESKILLS_DATABASE.categories;
   const numAxes = categories.length;
   const angleStep = (Math.PI * 2) / numAxes;
   
-  const isLightTheme = document.body.classList.contains("light-theme");
+  const isLightOrRetro = document.body.classList.contains("light-theme") || document.body.classList.contains("retro-theme");
   const bodyStyles = getComputedStyle(document.body);
   const accentBlue = bodyStyles.getPropertyValue('--accent-blue').trim() || "hsl(195, 90%, 60%)";
   const accentBlueGlow = bodyStyles.getPropertyValue('--accent-blue-glow').trim() || "rgba(56, 189, 248, 0.15)";
   const textColor = bodyStyles.getPropertyValue('--text-secondary').trim() || "hsl(240, 10%, 70%)";
-  const gridColor = isLightTheme ? "rgba(0, 0, 0, 0.06)" : "rgba(255, 255, 255, 0.05)";
-  const axisColor = isLightTheme ? "rgba(0, 0, 0, 0.08)" : "rgba(255, 255, 255, 0.08)";
+  const gridColor = isLightOrRetro ? "rgba(0, 0, 0, 0.08)" : "rgba(255, 255, 255, 0.05)";
+  const axisColor = isLightOrRetro ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.08)";
   
   for (let level = 1; level <= 4; level++) {
     const r = radius * (level / 4);
@@ -68,7 +68,7 @@ export function drawRadarChart(categoryStats) {
     ctx.stroke();
     
     if (level % 2 === 0) {
-      ctx.fillStyle = isLightTheme ? "rgba(0, 0, 0, 0.01)" : "rgba(255, 255, 255, 0.003)";
+      ctx.fillStyle = isLightOrRetro ? "rgba(0, 0, 0, 0.015)" : "rgba(255, 255, 255, 0.003)";
       ctx.fill();
     }
   }
@@ -153,9 +153,9 @@ export function drawTimelineChart(currentPct) {
   
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const isLightTheme = document.body.classList.contains("light-theme");
+  const isLightOrRetro = document.body.classList.contains("light-theme") || document.body.classList.contains("retro-theme");
   
-  const historyKey = `cinegrade_history_${currentState.selectedStudent}`;
+  const historyKey = `cineskills_history_${currentState.selectedStudent}`;
   let history = [];
   try {
     const saved = localStorage.getItem(historyKey);
@@ -188,8 +188,8 @@ export function drawTimelineChart(currentPct) {
   const accentBlue = bodyStyles.getPropertyValue('--accent-blue').trim() || "hsl(195, 90%, 60%)";
   const accentBlueGlow = bodyStyles.getPropertyValue('--accent-blue-glow').trim() || "rgba(56, 189, 248, 0.15)";
   const textColor = bodyStyles.getPropertyValue('--text-secondary').trim() || "hsl(240, 10%, 60%)";
-  const gridColor = isLightTheme ? "rgba(0, 0, 0, 0.05)" : "rgba(255, 255, 255, 0.04)";
-  const axisColor = isLightTheme ? "rgba(0, 0, 0, 0.08)" : "rgba(255, 255, 255, 0.08)";
+  const gridColor = isLightOrRetro ? "rgba(0, 0, 0, 0.08)" : "rgba(255, 255, 255, 0.04)";
+  const axisColor = isLightOrRetro ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.08)";
   
   const yTicks = [0, 25, 50, 75, 100];
   ctx.lineWidth = 1;

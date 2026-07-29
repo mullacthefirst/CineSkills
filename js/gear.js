@@ -2,7 +2,7 @@
 import { currentState, TIER_NAMES } from './state.js';
 
 export function getRequiredSkillsForGear(gear) {
-  const catData = CINEGRADE_DATABASE.categories.find(c => c.id === gear.category);
+  const catData = CINESKILLS_DATABASE.categories.find(c => c.id === gear.category);
   if (!catData) return [];
   return catData.skills
     .filter(s => s.tier <= gear.tier)
@@ -10,7 +10,7 @@ export function getRequiredSkillsForGear(gear) {
 }
 
 export function getStudentCategoryLicense(categoryId, progress) {
-  const cat = CINEGRADE_DATABASE.categories.find(c => c.id === categoryId);
+  const cat = CINESKILLS_DATABASE.categories.find(c => c.id === categoryId);
   if (!cat) return 0;
   
   const skills = cat.skills;
@@ -46,7 +46,7 @@ export function renderLicenseDashboard() {
   categoriesToRender.forEach(catInfo => {
     const licenseLvl = getStudentCategoryLicense(catInfo.id, progress);
     
-    const catData = CINEGRADE_DATABASE.categories.find(c => c.id === catInfo.id);
+    const catData = CINESKILLS_DATABASE.categories.find(c => c.id === catInfo.id);
     let nextTierText = "";
     let pct = 0;
     
@@ -96,8 +96,8 @@ export function renderLicenseDashboard() {
 }
 
 export function downloadCertificate(categoryId, tier) {
-  const studentName = localStorage.getItem("cinegrade_student_name") || "Callum";
-  const studentId = localStorage.getItem("cinegrade_student_id") || "OCO26000271";
+  const studentName = localStorage.getItem("cineskills_student_name") || "Callum";
+  const studentId = localStorage.getItem("cineskills_student_id") || "OCO26000271";
   
   const categoryNames = {
     camera: "Camera & Support",
@@ -113,7 +113,7 @@ export function downloadCertificate(categoryId, tier) {
     <div class="certificate-print-page">
       <div class="print-certificate-container">
         <div class="certificate-header-group">
-          <div class="certificate-logo">CineGrade</div>
+          <div class="certificate-logo">CineSkills</div>
           <div class="certificate-title">Certificate of Competency</div>
         </div>
         <div class="certificate-badge">🏆</div>
@@ -157,10 +157,10 @@ export function downloadCertificate(categoryId, tier) {
 
 export function renderGearView() {
   const studentId = currentState.selectedStudent || "callum_oco26000271";
-  const rawName = localStorage.getItem("cinegrade_student_name") || "Callum";
-  const rawId = localStorage.getItem("cinegrade_student_id") || "OCO26000271";
+  const rawName = localStorage.getItem("cineskills_student_name") || "Callum";
+  const rawId = localStorage.getItem("cineskills_student_id") || "OCO26000271";
   const activeStudentName = rawId ? `${rawName} (${rawId})` : rawName;
-  const studentEmoji = localStorage.getItem(`cinegrade_emoji_${studentId}`) || "🎬";
+  const studentEmoji = localStorage.getItem(`cineskills_emoji_${studentId}`) || "🎬";
   
   const studentBadge = document.getElementById("gear-active-student");
   if (studentBadge) {
