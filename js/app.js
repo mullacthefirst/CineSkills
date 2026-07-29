@@ -65,7 +65,7 @@ function init() {
   const activeStudentSession = getActiveStudentId();
   const activeStudentName = getActiveStudentName();
 
-  if (activeStudentSession && activeStudentName && activeStudentName !== "Student") {
+  if (activeStudentSession) {
     currentState.selectedStudent = activeStudentSession;
     setActiveStudentSession(activeStudentSession, activeStudentName);
 
@@ -588,6 +588,7 @@ export function switchView(viewName) {
   } else if (viewName === "matrix") {
     if (matrixView) matrixView.classList.add("active");
     if (tabs[1]) tabs[1].classList.add("active");
+    renderSkillMatrix();
   } else if (viewName === "gear") {
     if (gearView) gearView.classList.add("active");
     if (tabs[2]) tabs[2].classList.add("active");
@@ -666,24 +667,8 @@ export function setMatrixLayout(mode) {
 }
 
 export function checkBackupMilestones(pct) {
-  if (!currentState.selectedStudent) return;
-  const milestones = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
-  const storageKey = `cineskills_notified_milestones_${currentState.selectedStudent}`;
-  const savedMilestonesRaw = localStorage.getItem(storageKey);
-  let notifiedMilestones = [];
-  if (savedMilestonesRaw) {
-    try { notifiedMilestones = JSON.parse(savedMilestonesRaw); } catch (e) {}
-  }
-  
-  let updated = false;
-  milestones.forEach(m => {
-    if (pct >= m && !notifiedMilestones.includes(m)) {
-      notifiedMilestones.push(m);
-      updated = true;
-      if (!currentState.isInitialLoad) showBackupRecommendationToast(m);
-    }
-  });
-  if (updated) localStorage.setItem(storageKey, JSON.stringify(notifiedMilestones));
+  // JSON Export notifications disabled (automated local & cloud sync active)
+  return;
 }
 
 export function showBackupRecommendationToast(milestone) {
