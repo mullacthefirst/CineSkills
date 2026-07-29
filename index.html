@@ -209,8 +209,7 @@
             </div>
             <div class="dossier-identity">
               <span class="dossier-label">Student Profile</span>
-              <h2 id="dossier-student-name">Callum</h2>
-              <p id="dossier-student-id" class="dossier-id">OCO26000271</p>
+              <h2 id="dossier-student-name">Student Profile</h2>
             </div>
           </div>
           
@@ -431,13 +430,13 @@
       
       <form id="login-form" onsubmit="return handleLogin(event);">
         <div class="input-group">
-          <label for="login-name" class="input-label">Student Name</label>
-          <input type="text" id="login-name" placeholder="e.g. Callum" class="login-input" autocomplete="name">
+          <label for="login-username" class="input-label">Username</label>
+          <input type="text" id="login-username" placeholder="e.g. callum_film" class="login-input" autocomplete="username">
         </div>
         
         <div class="input-group" style="margin-top: 16px;">
-          <label for="login-id" class="input-label">Student ID</label>
-          <input type="text" id="login-id" placeholder="e.g. OCO26000271" class="login-input" autocomplete="username">
+          <label for="login-password" class="input-label">Password / PIN</label>
+          <input type="password" id="login-password" placeholder="••••••••" class="login-input" autocomplete="current-password">
         </div>
         
         <button type="button" onclick="handleLogin(event)" class="btn-status status-completed" style="margin-top: 24px; font-family: 'Outfit', sans-serif; width: 100%; justify-content: center; cursor: pointer;">

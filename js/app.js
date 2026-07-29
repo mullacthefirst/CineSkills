@@ -512,18 +512,18 @@ export function handleLogin(event) {
     if (typeof event.stopPropagation === "function") event.stopPropagation();
   }
 
-  const nameEl = document.getElementById("login-name");
-  const idEl = document.getElementById("login-id");
-  const nameInput = nameEl ? nameEl.value.trim() : "";
-  const idInput = idEl ? idEl.value.trim() : "";
+  const usernameEl = document.getElementById("login-username");
+  const passwordEl = document.getElementById("login-password");
+  const usernameInput = usernameEl ? usernameEl.value.trim() : "";
+  const passwordInput = passwordEl ? passwordEl.value : "";
 
-  if (!nameInput || !idInput) {
-    alert("Please enter both your Student Name and Student ID.");
+  if (!usernameInput || !passwordInput) {
+    alert("Please enter both your Username and Password / PIN.");
     return false;
   }
 
   try {
-    if (nameInput.toLowerCase() === "alan smithee" || idInput.toLowerCase() === "alan smithee") {
+    if (usernameInput.toLowerCase() === "alan smithee" || passwordInput.toLowerCase() === "alan smithee") {
       triggerAlanSmitheeMode();
       return false;
     }
@@ -533,10 +533,10 @@ export function handleLogin(event) {
       document.body.classList.remove("smithee-mode");
     }
 
-    const sanitizedId = idInput.toLowerCase().replace(/[^a-z0-9_-]/g, "");
-    const sessionStudentId = sanitizedId || idInput;
+    const sanitizedUser = usernameInput.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+    const sessionStudentId = sanitizedUser || usernameInput;
 
-    setActiveStudentSession(sessionStudentId, nameInput);
+    setActiveStudentSession(sessionStudentId, usernameInput);
     currentState.selectedStudent = sessionStudentId;
     updateStudentHeader();
 
