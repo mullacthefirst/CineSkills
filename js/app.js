@@ -52,16 +52,6 @@ function init() {
   // Initialize optional Supabase Cloud Sync
   initSupabase();
 
-  const savedTheme = localStorage.getItem("cineskills_theme") || "dark";
-  selectTheme(savedTheme);
-
-  const savedDyslexia = localStorage.getItem("cineskills_dyslexia_font");
-  if (savedDyslexia === "true") {
-    document.body.classList.add("dyslexia-font");
-    const btnText = document.getElementById("dyslexia-btn-text");
-    if (btnText) btnText.textContent = "Standard Font";
-  }
-
   const activeStudentSession = getActiveStudentId();
   const activeStudentName = getActiveStudentName();
 
@@ -78,6 +68,16 @@ function init() {
     }
   } else {
     openLoginOverlay();
+  }
+
+  const savedTheme = localStorage.getItem("cineskills_theme") || "dark";
+  selectTheme(savedTheme);
+
+  const savedDyslexia = localStorage.getItem("cineskills_dyslexia_font");
+  if (savedDyslexia === "true") {
+    document.body.classList.add("dyslexia-font");
+    const btnText = document.getElementById("dyslexia-btn-text");
+    if (btnText) btnText.textContent = "Standard Font";
   }
 
   const searchInput = document.getElementById("search-input");
@@ -561,6 +561,86 @@ export function handleLogin(event) {
     console.warn("[Login] Background cloud pull skipped:", err);
   });
 
+export function switchAuthTab(tabName) {
+  const loginForm = document.getElementById("login-form");
+  const regForm = document.getElementById("register-form");
+  const loginTabBtn = document.getElementById("tab-btn-login");
+  const regTabBtn = document.getElementById("tab-btn-register");
+
+  if (tabName === "register") {
+    if (loginForm) loginForm.style.display = "none";
+    if (regForm) regForm.style.display = "block";
+    if (loginTabBtn) {
+      loginTabBtn.style.background = "transparent";
+      loginTabBtn.style.color = "var(--text-secondary)";
+    }
+    if (regTabBtn) {
+      regTabBtn.style.background = "var(--accent-blue)";
+      regTabBtn.style.color = "#fff";
+    }
+  } else {
+    if (loginForm) loginForm.style.display = "block";
+    if (regForm) regForm.style.display = "none";
+    if (loginTabBtn) {
+      loginTabBtn.style.background = "var(--accent-blue)";
+      loginTabBtn.style.color = "#fff";
+    }
+    if (regTabBtn) {
+      regTabBtn.style.background = "transparent";
+      regTabBtn.style.color = "var(--text-secondary)";
+    }
+  }
+}
+
+export function handleRegister(event) {
+  if (event) {
+    if (typeof event.preventDefault === "function") event.preventDefault();
+    if (typeof event.stopPropagation === "function") event.stopPropagation();
+  }
+
+  const usernameEl = document.getElementById("reg-username");
+  const passwordEl = document.getElementById("reg-password");
+  const passwordConfirmEl = document.getElementById("reg-password-confirm");
+
+  const usernameInput = usernameEl ? usernameEl.value.trim() : "";
+  const passwordInput = passwordEl ? passwordEl.value : "";
+  const passwordConfirmInput = passwordConfirmEl ? passwordConfirmEl.value : "";
+
+  if (!usernameInput || !passwordInput) {
+    alert("Please fill in both Username and Password / PIN.");
+    return false;
+  }
+
+  if (passwordInput !== passwordConfirmInput) {
+    alert("Passwords do not match. Please verify your Password / PIN.");
+    return false;
+  }
+
+  try {
+    const sanitizedUser = usernameInput.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+    const sessionStudentId = sanitizedUser || usernameInput;
+
+    setActiveStudentSession(sessionStudentId, usernameInput);
+    currentState.selectedStudent = sessionStudentId;
+    updateStudentHeader();
+
+    // Instantly load student local progress
+    loadStudentProgress(sessionStudentId);
+  } catch (err) {
+    console.error("[Register Error]", err);
+  } finally {
+    closeLoginOverlay();
+  }
+
+  pullProgressFromCloud(currentState.selectedStudent).then(cloudProgress => {
+    if (cloudProgress) {
+      currentState.progress = cloudProgress;
+      saveStudentProgress();
+      updateDashboard();
+      renderSkillMatrix();
+    }
+  }).catch(err => console.warn("[Register Cloud Check]", err));
+
   return false;
 }
 
@@ -777,7 +857,9 @@ window.closeMobileMenu = closeMobileMenu;
 window.toggleDyslexiaFont = toggleDyslexiaFont;
 window.openLoginOverlay = openLoginOverlay;
 window.closeLoginOverlay = closeLoginOverlay;
+window.switchAuthTab = switchAuthTab;
 window.handleLogin = handleLogin;
+window.handleRegister = handleRegister;
 window.setMatrixLayout = setMatrixLayout;
 window.toggleTierSection = toggleTierSection;
 window.cycleSkillLevel = (e, catId, skillName) => cycleSkillLevel(e, catId, skillName, updateDashboard);
