@@ -429,18 +429,18 @@
       <h2 class="login-title">CineSkills Access</h2>
       <p class="login-subtitle">Please enter your details to load your competency matrix.</p>
       
-      <form id="login-form" onsubmit="handleLogin(event)">
+      <form id="login-form" onsubmit="return handleLogin(event);">
         <div class="input-group">
           <label for="login-name" class="input-label">Student Name</label>
-          <input type="text" id="login-name" required placeholder="e.g. Callum" class="login-input">
+          <input type="text" id="login-name" placeholder="e.g. Callum" class="login-input" autocomplete="name">
         </div>
         
         <div class="input-group" style="margin-top: 16px;">
           <label for="login-id" class="input-label">Student ID</label>
-          <input type="text" id="login-id" required placeholder="e.g. OCO26000271" class="login-input">
+          <input type="text" id="login-id" placeholder="e.g. OCO26000271" class="login-input" autocomplete="username">
         </div>
         
-        <button type="submit" class="btn-status status-completed" style="margin-top: 24px; font-family: 'Outfit', sans-serif;">
+        <button type="button" onclick="handleLogin(event)" class="btn-status status-completed" style="margin-top: 24px; font-family: 'Outfit', sans-serif; width: 100%; justify-content: center; cursor: pointer;">
           Access Matrix
         </button>
       </form>

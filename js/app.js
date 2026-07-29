@@ -464,64 +464,70 @@ export function toggleTheme() {
   selectTheme(themes[nextIndex]);
 }
 
-export async function handleLogin(event) {
+export function handleLogin(event) {
   if (event) {
-    event.preventDefault();
+    if (typeof event.preventDefault === "function") event.preventDefault();
+    if (typeof event.stopPropagation === "function") event.stopPropagation();
   }
 
   const nameEl = document.getElementById("login-name");
   const idEl = document.getElementById("login-id");
-  if (!nameEl || !idEl) return;
-
-  const nameInput = nameEl.value.trim();
-  const idInput = idEl.value.trim();
+  const nameInput = nameEl ? nameEl.value.trim() : "";
+  const idInput = idEl ? idEl.value.trim() : "";
 
   if (!nameInput || !idInput) {
     alert("Please enter both your Student Name and Student ID.");
-    return;
+    return false;
   }
 
-  if (nameInput.toLowerCase() === "alan smithee" || idInput.toLowerCase() === "alan smithee") {
-    triggerAlanSmitheeMode();
-    return;
-  }
-
-  if (currentState.isAlanSmithee) {
-    currentState.isAlanSmithee = false;
-    document.body.classList.remove("smithee-mode");
-  }
-
-  const sanitizedId = idInput.toLowerCase().replace(/[^a-z0-9_-]/g, "");
-  const sessionStudentId = sanitizedId || idInput;
-
-  sessionStorage.setItem("cineskills_active_student_id", sessionStudentId);
-  sessionStorage.setItem("cineskills_active_student_name", nameInput);
-  localStorage.setItem("cineskills_last_student_id", sessionStudentId);
-  localStorage.setItem("cineskills_last_student_name", nameInput);
-
-  currentState.selectedStudent = sessionStudentId;
-
-  const activeStudentDisplay = document.getElementById("active-student-display");
-  if (activeStudentDisplay) {
-    activeStudentDisplay.textContent = `👤 ${nameInput}`;
-  }
-
-  // Instantly load local progress & close overlay
-  loadStudentProgress(sessionStudentId);
-  closeLoginOverlay();
-
-  // Asynchronously fetch latest progress from cloud if available
   try {
-    const cloudProgress = await pullProgressFromCloud(sessionStudentId);
+    if (nameInput.toLowerCase() === "alan smithee" || idInput.toLowerCase() === "alan smithee") {
+      triggerAlanSmitheeMode();
+      return false;
+    }
+
+    if (currentState.isAlanSmithee) {
+      currentState.isAlanSmithee = false;
+      document.body.classList.remove("smithee-mode");
+    }
+
+    const sanitizedId = idInput.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+    const sessionStudentId = sanitizedId || idInput;
+
+    sessionStorage.setItem("cineskills_active_student_id", sessionStudentId);
+    sessionStorage.setItem("cineskills_active_student_name", nameInput);
+    localStorage.setItem("cineskills_last_student_id", sessionStudentId);
+    localStorage.setItem("cineskills_last_student_name", nameInput);
+
+    currentState.selectedStudent = sessionStudentId;
+
+    const activeStudentDisplay = document.getElementById("active-student-display");
+    if (activeStudentDisplay) {
+      activeStudentDisplay.textContent = `👤 ${nameInput}`;
+    }
+
+    // Instantly load student local progress
+    loadStudentProgress(sessionStudentId);
+  } catch (err) {
+    console.error("[Login Error] Exception during local login setup:", err);
+  } finally {
+    // ALWAYS remove overlay active state
+    closeLoginOverlay();
+  }
+
+  // Non-blocking background cloud restore
+  pullProgressFromCloud(currentState.selectedStudent).then(cloudProgress => {
     if (cloudProgress) {
       currentState.progress = cloudProgress;
       saveStudentProgress();
       updateDashboard();
       renderSkillMatrix();
     }
-  } catch (err) {
-    console.warn("[Login] Cloud pull skipped or offline:", err);
-  }
+  }).catch(err => {
+    console.warn("[Login] Background cloud pull skipped:", err);
+  });
+
+  return false;
 }
 
 export function switchView(viewName) {
