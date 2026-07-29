@@ -53,6 +53,7 @@ function init() {
         activeStudentDisplay.textContent = `👤 ${activeStudentName}`;
       }
       loadStudentProgress(activeStudentSession);
+      closeLoginOverlay();
     }
   } else {
     openLoginOverlay();
@@ -835,4 +836,8 @@ window.addEventListener('beforeinstallprompt', (e) => {
   if (btn) btn.style.display = 'flex';
 });
 
-document.addEventListener("DOMContentLoaded", init);
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
