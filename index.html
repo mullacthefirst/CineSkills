@@ -448,9 +448,9 @@
   </div>
 
   <!-- Interactive Detail Modal -->
-  <div id="detail-modal" class="modal-overlay">
-    <div class="modal-content">
-      <button id="close-modal-btn" class="close-btn" aria-label="Close modal">&times;</button>
+  <div id="detail-modal" class="modal-overlay" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button id="close-modal-btn" class="close-btn" aria-label="Close modal" onclick="closeModal()">&times;</button>
       
       <div class="modal-header">
         <h2 id="modal-title">Skill Title</h2>

@@ -37,10 +37,14 @@ function init() {
     if (btnText) btnText.textContent = "Standard Font";
   }
 
-  const activeStudentSession = sessionStorage.getItem("cineskills_active_student_id");
+  const activeStudentSession = sessionStorage.getItem("cineskills_active_student_id") || localStorage.getItem("cineskills_last_student_id");
+  const activeStudentName = sessionStorage.getItem("cineskills_active_student_name") || localStorage.getItem("cineskills_last_student_name") || "Student";
+
   if (activeStudentSession) {
     currentState.selectedStudent = activeStudentSession;
-    const activeStudentName = sessionStorage.getItem("cineskills_active_student_name") || "Student";
+    sessionStorage.setItem("cineskills_active_student_id", activeStudentSession);
+    sessionStorage.setItem("cineskills_active_student_name", activeStudentName);
+
     if (activeStudentName.includes("Alan Smithee")) {
       triggerAlanSmitheeMode();
     } else {

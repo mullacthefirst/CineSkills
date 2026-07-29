@@ -110,7 +110,7 @@ export function renderSkillMatrix() {
         if (tierSkills.length === 0) return;
         
         const rowId = `${cat.id}-tier-${t}`;
-        const isExpanded = currentState.expandedTiers[rowId] === true;
+        const isExpanded = currentState.expandedTiers[rowId] !== false;
         const collapsedClass = isExpanded ? "" : "collapsed";
         
         skillsHtml += `
