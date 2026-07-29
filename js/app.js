@@ -114,16 +114,32 @@ function init() {
 
 export function loadStudentProgress(studentId) {
   currentState.isInitialLoad = true;
-  const localKey = `cineskills_progress_${studentId}`;
-  const saved = localStorage.getItem(localKey);
+  const db = window.CINESKILLS_DATABASE || (typeof CINESKILLS_DATABASE !== 'undefined' ? CINESKILLS_DATABASE : null);
+  
+  let saved = localStorage.getItem(`cineskills_progress_${studentId}`);
+  if (!saved && studentId) {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith("cineskills_progress_")) {
+        const potentialData = localStorage.getItem(key);
+        if (potentialData) {
+          saved = potentialData;
+          console.log("[Data Recovery] Found existing local student progress from key:", key);
+          break;
+        }
+      }
+    }
+  }
   
   currentState.progress = {};
   
-  CINESKILLS_DATABASE.categories.forEach(cat => {
-    cat.skills.forEach(skill => {
-      currentState.progress[skill.name] = { level: 0, notes: "" };
+  if (db && db.categories) {
+    db.categories.forEach(cat => {
+      cat.skills.forEach(skill => {
+        currentState.progress[skill.name] = { level: 0, notes: "" };
+      });
     });
-  });
+  }
 
   if (saved) {
     try {

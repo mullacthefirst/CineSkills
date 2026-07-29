@@ -119,21 +119,50 @@ export function syncProgressToCloud() {
   }, 1200); // 1.2 second debounce
 }
 
-// Pull progress from cloud database (using anonymized SHA-256 cloud ID)
+// Pull progress from cloud database with multi-tier fallback for data recovery
 export async function pullProgressFromCloud(rawStudentId) {
   if (!rawStudentId || !supabaseClient) return null;
 
   try {
     const anonymizedCloudId = await hashStudentId(rawStudentId);
-    const { data, error } = await supabaseClient
+    
+    // Tier 1: Query by anonymized SHA-256 cloud ID
+    const { data: anonData } = await supabaseClient
       .from('cineskills_student_progress')
       .select('*')
       .eq('student_id', anonymizedCloudId)
-      .single();
+      .maybeSingle();
 
-    if (data && data.progress_json) {
-      console.log("[Cloud Sync] Pulled student progress from cloud!");
-      return data.progress_json;
+    if (anonData && anonData.progress_json) {
+      console.log("[Cloud Sync] Pulled student progress from cloud (anonymized ID)");
+      return anonData.progress_json;
+    }
+
+    // Tier 2: Query by raw student ID (for legacy data migration)
+    const { data: rawData } = await supabaseClient
+      .from('cineskills_student_progress')
+      .select('*')
+      .eq('student_id', rawStudentId)
+      .maybeSingle();
+
+    if (rawData && rawData.progress_json) {
+      console.log("[Cloud Sync] Pulled legacy student progress from cloud! Migrating to anonymized ID...");
+      return rawData.progress_json;
+    }
+
+    // Tier 3: Query by active student name (if available in session)
+    const activeName = sessionStorage.getItem("cineskills_active_student_name");
+    if (activeName) {
+      const { data: nameData } = await supabaseClient
+        .from('cineskills_student_progress')
+        .select('*')
+        .eq('student_name', activeName)
+        .maybeSingle();
+
+      if (nameData && nameData.progress_json) {
+        console.log("[Cloud Sync] Pulled student progress from cloud by name!");
+        return nameData.progress_json;
+      }
     }
   } catch (err) {
     console.warn("[Cloud Sync] Unable to pull cloud data:", err);

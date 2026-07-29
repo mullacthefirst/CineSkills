@@ -21,7 +21,10 @@ export function renderSkillMatrix() {
     }
   }
 
-  CINESKILLS_DATABASE.categories.forEach(cat => {
+  const db = window.CINESKILLS_DATABASE || (typeof CINESKILLS_DATABASE !== 'undefined' ? CINESKILLS_DATABASE : null);
+  if (!db || !db.categories) return;
+
+  db.categories.forEach(cat => {
     const filteredSkills = cat.skills.filter(skill => {
       const matchesSearch = skill.name.toLowerCase().includes(currentState.searchQuery) ||
                             skill.purpose.toLowerCase().includes(currentState.searchQuery);
