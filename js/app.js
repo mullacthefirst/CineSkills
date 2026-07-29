@@ -88,11 +88,10 @@ function init() {
     });
   }
 
-  const exportBtn = document.getElementById("export-btn");
-  if (exportBtn) exportBtn.addEventListener("click", exportData);
-  
-  const importFile = document.getElementById("import-file");
-  if (importFile) importFile.addEventListener("change", (e) => importData(e, loadStudentProgress));
+  const loginForm = document.getElementById("login-form");
+  if (loginForm) {
+    loginForm.addEventListener("submit", handleLogin);
+  }
 
   document.addEventListener("click", (e) => {
     const container = document.querySelector(".settings-menu-container");
@@ -406,7 +405,7 @@ export function openLoginOverlay() {
 
 export function closeLoginOverlay() {
   const loginOverlay = document.getElementById("login-overlay");
-  if (currentState.selectedStudent && loginOverlay) {
+  if (loginOverlay) {
     loginOverlay.classList.remove("active");
   }
 }
@@ -465,12 +464,22 @@ export function toggleTheme() {
   selectTheme(themes[nextIndex]);
 }
 
-export function handleLogin(event) {
-  event.preventDefault();
-  const nameInput = document.getElementById("login-name").value.trim();
-  const idInput = document.getElementById("login-id").value.trim();
+export async function handleLogin(event) {
+  if (event) {
+    event.preventDefault();
+  }
 
-  if (!nameInput || !idInput) return;
+  const nameEl = document.getElementById("login-name");
+  const idEl = document.getElementById("login-id");
+  if (!nameEl || !idEl) return;
+
+  const nameInput = nameEl.value.trim();
+  const idInput = idEl.value.trim();
+
+  if (!nameInput || !idInput) {
+    alert("Please enter both your Student Name and Student ID.");
+    return;
+  }
 
   if (nameInput.toLowerCase() === "alan smithee" || idInput.toLowerCase() === "alan smithee") {
     triggerAlanSmitheeMode();
@@ -482,17 +491,37 @@ export function handleLogin(event) {
     document.body.classList.remove("smithee-mode");
   }
 
-  sessionStorage.setItem("cineskills_active_student_id", idInput);
+  const sanitizedId = idInput.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+  const sessionStudentId = sanitizedId || idInput;
+
+  sessionStorage.setItem("cineskills_active_student_id", sessionStudentId);
   sessionStorage.setItem("cineskills_active_student_name", nameInput);
-  currentState.selectedStudent = idInput;
+  localStorage.setItem("cineskills_last_student_id", sessionStudentId);
+  localStorage.setItem("cineskills_last_student_name", nameInput);
+
+  currentState.selectedStudent = sessionStudentId;
 
   const activeStudentDisplay = document.getElementById("active-student-display");
   if (activeStudentDisplay) {
     activeStudentDisplay.textContent = `👤 ${nameInput}`;
   }
 
-  loadStudentProgress(idInput);
+  // Instantly load local progress & close overlay
+  loadStudentProgress(sessionStudentId);
   closeLoginOverlay();
+
+  // Asynchronously fetch latest progress from cloud if available
+  try {
+    const cloudProgress = await pullProgressFromCloud(sessionStudentId);
+    if (cloudProgress) {
+      currentState.progress = cloudProgress;
+      saveStudentProgress();
+      updateDashboard();
+      renderSkillMatrix();
+    }
+  } catch (err) {
+    console.warn("[Login] Cloud pull skipped or offline:", err);
+  }
 }
 
 export function switchView(viewName) {

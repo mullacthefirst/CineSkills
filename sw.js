@@ -1,5 +1,5 @@
 // CineSkills Service Worker — 100% Offline Capability (Network First with Cache Fallback)
-const CACHE_NAME = "cineskills-v8";
+const CACHE_NAME = "cineskills-v9";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
