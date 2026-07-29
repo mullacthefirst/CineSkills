@@ -96,8 +96,8 @@ export function renderLicenseDashboard() {
 }
 
 export function downloadCertificate(categoryId, tier) {
-  const studentName = localStorage.getItem("cineskills_student_name") || "Callum";
-  const studentId = localStorage.getItem("cineskills_student_id") || "OCO26000271";
+  const studentName = sessionStorage.getItem("cineskills_active_student_name") || localStorage.getItem("cineskills_last_student_name") || localStorage.getItem("cineskills_student_name") || "Student";
+  const studentId = sessionStorage.getItem("cineskills_active_student_id") || localStorage.getItem("cineskills_last_student_id") || localStorage.getItem("cineskills_student_id") || "";
   
   const categoryNames = {
     camera: "Camera & Support",
@@ -156,9 +156,9 @@ export function downloadCertificate(categoryId, tier) {
 }
 
 export function renderGearView() {
-  const studentId = currentState.selectedStudent || "callum_oco26000271";
-  const rawName = localStorage.getItem("cineskills_student_name") || "Callum";
-  const rawId = localStorage.getItem("cineskills_student_id") || "OCO26000271";
+  const studentId = currentState.selectedStudent || "";
+  const rawName = sessionStorage.getItem("cineskills_active_student_name") || localStorage.getItem("cineskills_last_student_name") || localStorage.getItem("cineskills_student_name") || "Student";
+  const rawId = sessionStorage.getItem("cineskills_active_student_id") || localStorage.getItem("cineskills_last_student_id") || localStorage.getItem("cineskills_student_id") || "";
   const activeStudentName = rawId ? `${rawName} (${rawId})` : rawName;
   const studentEmoji = localStorage.getItem(`cineskills_emoji_${studentId}`) || "🎬";
   

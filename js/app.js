@@ -11,6 +11,31 @@ let targetX = 0, targetY = 0, curX = 0, curY = 0;
 let deferredPrompt = null;
 
 // Initialize Application State
+export function getActiveStudentName() {
+  return sessionStorage.getItem("cineskills_active_student_name") ||
+         localStorage.getItem("cineskills_last_student_name") ||
+         localStorage.getItem("cineskills_student_name") || "Student";
+}
+
+export function getActiveStudentId() {
+  return sessionStorage.getItem("cineskills_active_student_id") ||
+         localStorage.getItem("cineskills_last_student_id") ||
+         localStorage.getItem("cineskills_student_id") || "";
+}
+
+export function setActiveStudentSession(id, name) {
+  if (id) {
+    sessionStorage.setItem("cineskills_active_student_id", id);
+    localStorage.setItem("cineskills_last_student_id", id);
+    localStorage.setItem("cineskills_student_id", id);
+  }
+  if (name) {
+    sessionStorage.setItem("cineskills_active_student_name", name);
+    localStorage.setItem("cineskills_last_student_name", name);
+    localStorage.setItem("cineskills_student_name", name);
+  }
+}
+
 function init() {
   // Initialize PWA Service Worker for 100% Offline Use
   if ('serviceWorker' in navigator) {
@@ -37,21 +62,17 @@ function init() {
     if (btnText) btnText.textContent = "Standard Font";
   }
 
-  const activeStudentSession = sessionStorage.getItem("cineskills_active_student_id") || localStorage.getItem("cineskills_last_student_id");
-  const activeStudentName = sessionStorage.getItem("cineskills_active_student_name") || localStorage.getItem("cineskills_last_student_name") || "Student";
+  const activeStudentSession = getActiveStudentId();
+  const activeStudentName = getActiveStudentName();
 
-  if (activeStudentSession) {
+  if (activeStudentSession && activeStudentName && activeStudentName !== "Student") {
     currentState.selectedStudent = activeStudentSession;
-    sessionStorage.setItem("cineskills_active_student_id", activeStudentSession);
-    sessionStorage.setItem("cineskills_active_student_name", activeStudentName);
+    setActiveStudentSession(activeStudentSession, activeStudentName);
 
     if (activeStudentName.includes("Alan Smithee")) {
       triggerAlanSmitheeMode();
     } else {
-      const activeStudentDisplay = document.getElementById("active-student-display");
-      if (activeStudentDisplay) {
-        activeStudentDisplay.textContent = `👤 ${activeStudentName}`;
-      }
+      updateStudentHeader();
       loadStudentProgress(activeStudentSession);
       closeLoginOverlay();
     }
@@ -515,17 +536,9 @@ export function handleLogin(event) {
     const sanitizedId = idInput.toLowerCase().replace(/[^a-z0-9_-]/g, "");
     const sessionStudentId = sanitizedId || idInput;
 
-    sessionStorage.setItem("cineskills_active_student_id", sessionStudentId);
-    sessionStorage.setItem("cineskills_active_student_name", nameInput);
-    localStorage.setItem("cineskills_last_student_id", sessionStudentId);
-    localStorage.setItem("cineskills_last_student_name", nameInput);
-
+    setActiveStudentSession(sessionStudentId, nameInput);
     currentState.selectedStudent = sessionStudentId;
-
-    const activeStudentDisplay = document.getElementById("active-student-display");
-    if (activeStudentDisplay) {
-      activeStudentDisplay.textContent = `👤 ${nameInput}`;
-    }
+    updateStudentHeader();
 
     // Instantly load student local progress
     loadStudentProgress(sessionStudentId);
@@ -746,10 +759,8 @@ export function triggerAlanSmitheeMode() {
 export function updateStudentHeader() {
   if (!currentState.selectedStudent) return;
   const studentId = currentState.selectedStudent;
-  const nameInput = localStorage.getItem("cineskills_student_name") || "Student";
-  const idInput = localStorage.getItem("cineskills_student_id") || "";
-  const activeStudentName = idInput ? `${nameInput} (${idInput})` : nameInput;
-  const emoji = localStorage.getItem(`cineskills_emoji_${studentId}`) || "🎬";
+  const activeStudentName = getActiveStudentName();
+  const emoji = localStorage.getItem(`cineskills_emoji_${studentId}`) || "👤";
   
   const activeStudentDisplay = document.getElementById("active-student-display");
   if (activeStudentDisplay) activeStudentDisplay.textContent = `${emoji} ${activeStudentName}`;

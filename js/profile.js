@@ -204,8 +204,8 @@ export function handleAddProjectSubmit(e) {
 }
 
 export function renderProfileView() {
-  const rawName = localStorage.getItem("cineskills_student_name") || "Callum";
-  const rawId = localStorage.getItem("cineskills_student_id") || "OCO26000271";
+  const rawName = sessionStorage.getItem("cineskills_active_student_name") || localStorage.getItem("cineskills_last_student_name") || localStorage.getItem("cineskills_student_name") || "Student";
+  const rawId = sessionStorage.getItem("cineskills_active_student_id") || localStorage.getItem("cineskills_last_student_id") || localStorage.getItem("cineskills_student_id") || "";
   
   const dossierStudentName = document.getElementById("dossier-student-name");
   const dossierStudentId = document.getElementById("dossier-student-id");

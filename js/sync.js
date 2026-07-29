@@ -151,7 +151,7 @@ export async function pullProgressFromCloud(rawStudentId) {
     }
 
     // Tier 3: Query by active student name (if available in session)
-    const activeName = sessionStorage.getItem("cineskills_active_student_name");
+    const activeName = sessionStorage.getItem("cineskills_active_student_name") || localStorage.getItem("cineskills_last_student_name") || localStorage.getItem("cineskills_student_name");
     if (activeName) {
       const { data: nameData } = await supabaseClient
         .from('cineskills_student_progress')
