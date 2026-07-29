@@ -2096,26 +2096,33 @@ body.retro-theme .btn-competency:not(.active):hover {
 }
 
 /* Theme Option Group Styling in Settings */
+.settings-dropdown {
+  min-width: 260px;
+}
+
 .theme-options-group {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 6px;
   padding: 6px 12px 10px;
+  width: 100%;
 }
 
 .theme-btn-option {
-  flex: 1;
+  width: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 8px 6px;
+  padding: 8px 4px;
   border-radius: 8px;
   border: 1px solid var(--panel-border);
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
   font-family: 'Outfit', sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
   transition: all 0.2s ease;
 }

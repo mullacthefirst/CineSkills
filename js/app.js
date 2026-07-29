@@ -37,16 +37,6 @@ function init() {
     if (btnText) btnText.textContent = "Standard Font";
   }
 
-  const savedAnimations = localStorage.getItem("cineskills_disable_animations");
-  if (savedAnimations === "true") {
-    document.body.classList.add("disable-animations");
-    const btnText = document.getElementById("animations-btn-text");
-    if (btnText) btnText.textContent = "Enable Animations";
-  }
-
-  const savedCineTheme = localStorage.getItem("cineskills_cine_theme") || "default";
-  changeCineTheme(savedCineTheme);
-
   const activeStudentSession = sessionStorage.getItem("cineskills_active_student_id");
   if (activeStudentSession) {
     currentState.selectedStudent = activeStudentSession;
@@ -598,22 +588,7 @@ export function toggleDyslexiaFont() {
   if (btnText) btnText.textContent = isDyslexia ? "Standard Font" : "Dyslexia Font";
 }
 
-export function toggleAnimations() {
-  const isDisable = document.body.classList.toggle("disable-animations");
-  localStorage.setItem("cineskills_disable_animations", isDisable ? "true" : "false");
-  const btnText = document.getElementById("animations-btn-text");
-  if (btnText) btnText.textContent = isDisable ? "Enable Animations" : "Disable Animations";
-}
 
-export function changeCineTheme(themeValue) {
-  document.body.classList.remove("theme-technicolor", "theme-cyberpunk", "theme-noir");
-  if (themeValue && themeValue !== "default") {
-    document.body.classList.add(`theme-${themeValue}`);
-  }
-  localStorage.setItem("cineskills_cine_theme", themeValue);
-  const selectEl = document.getElementById("cine-theme-select");
-  if (selectEl) selectEl.value = themeValue;
-}
 
 export function setMatrixLayout(mode) {
   currentState.matrixLayout = mode;
@@ -748,8 +723,6 @@ window.selectTheme = selectTheme;
 window.toggleMobileMenu = toggleMobileMenu;
 window.closeMobileMenu = closeMobileMenu;
 window.toggleDyslexiaFont = toggleDyslexiaFont;
-window.toggleAnimations = toggleAnimations;
-window.changeCineTheme = changeCineTheme;
 window.openLoginOverlay = openLoginOverlay;
 window.closeLoginOverlay = closeLoginOverlay;
 window.handleLogin = handleLogin;
@@ -760,8 +733,6 @@ window.openSkillDetail = openSkillDetail;
 window.setModalCompetencyLevel = (level) => setModalCompetencyLevel(level, updateDashboard);
 window.handleNotesInput = handleNotesInput;
 window.closeModal = closeModal;
-window.exportData = exportData;
-window.importData = (e) => importData(e, loadStudentProgress);
 window.exportPDF = exportPDF;
 window.confirmResetProgress = confirmResetProgress;
 window.closeResetModal = closeResetModal;

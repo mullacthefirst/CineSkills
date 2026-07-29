@@ -31,9 +31,28 @@ export function initSupabase() {
   }
 }
 
+// GDPR Compliance: Cryptographic SHA-256 Pseudonymization Helper
+export async function hashStudentId(rawId) {
+  if (!rawId) return "anon_guest";
+  try {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(rawId.toLowerCase().trim() + "_cineskills_gdpr_salt_v1");
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return "anon_" + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch (e) {
+    let hash = 0;
+    for (let i = 0; i < rawId.length; i++) {
+      hash = ((hash << 5) - hash) + rawId.charCodeAt(i);
+      hash |= 0;
+    }
+    return "anon_" + Math.abs(hash).toString(36);
+  }
+}
+
 let syncDebounceTimer = null;
 
-// Sync progress to cloud database (Debounced to prevent notification spam)
+// Sync progress to cloud database (Debounced & 100% GDPR Pseudonymized)
 export function syncProgressToCloud() {
   if (syncDebounceTimer) {
     clearTimeout(syncDebounceTimer);
@@ -46,13 +65,16 @@ export function syncProgressToCloud() {
       initSupabase();
     }
 
-    const studentId = currentState.selectedStudent;
-    if (!studentId || !supabaseClient) {
+    const rawStudentId = currentState.selectedStudent;
+    if (!rawStudentId || !supabaseClient) {
       updateCloudSyncStatusIndicator("offline");
       return;
     }
 
-    const studentName = sessionStorage.getItem("cineskills_active_student_name") || "Student";
+    // Hash Student ID & create anonymous alias for GDPR Compliance (zero PII sent to 3rd party)
+    const anonymizedCloudId = await hashStudentId(rawStudentId);
+    const anonymizedDisplayName = `Student #${anonymizedCloudId.substring(5, 11).toUpperCase()}`;
+
     const progress = currentState.progress || {};
 
     let earnedXp = 0;
@@ -75,8 +97,8 @@ export function syncProgressToCloud() {
       const { data, error } = await supabaseClient
         .from('cineskills_student_progress')
         .upsert({
-          student_id: studentId,
-          student_name: studentName,
+          student_id: anonymizedCloudId,
+          student_name: anonymizedDisplayName,
           progress_json: progress,
           xp: earnedXp,
           mastered_count: masteredCount,
@@ -87,7 +109,7 @@ export function syncProgressToCloud() {
         console.error("[Cloud Sync] Database error during sync:", error.message);
         updateCloudSyncStatusIndicator("error");
       } else {
-        console.log("[Cloud Sync] Progress synced to cloud successfully for:", studentName);
+        console.log("[Cloud Sync] GDPR Pseudonymized progress synced for:", anonymizedDisplayName);
         updateCloudSyncStatusIndicator("synced");
       }
     } catch (err) {
@@ -97,15 +119,16 @@ export function syncProgressToCloud() {
   }, 1200); // 1.2 second debounce
 }
 
-// Pull progress from cloud database
-export async function pullProgressFromCloud(studentId) {
-  if (!studentId || !supabaseClient) return null;
+// Pull progress from cloud database (using anonymized SHA-256 cloud ID)
+export async function pullProgressFromCloud(rawStudentId) {
+  if (!rawStudentId || !supabaseClient) return null;
 
   try {
+    const anonymizedCloudId = await hashStudentId(rawStudentId);
     const { data, error } = await supabaseClient
       .from('cineskills_student_progress')
       .select('*')
-      .eq('student_id', studentId)
+      .eq('student_id', anonymizedCloudId)
       .single();
 
     if (data && data.progress_json) {
