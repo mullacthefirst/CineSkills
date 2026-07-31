@@ -46,7 +46,10 @@
         
         <!-- Settings Menu -->
         <div class="settings-menu-container">
-          <button id="settings-cog-btn" class="settings-cog-btn" aria-label="Settings" onclick="toggleSettingsMenu()">⚙️</button>
+          <button id="settings-cog-btn" class="settings-cog-btn" aria-label="Settings" onclick="toggleSettingsMenu()">
+            <span class="cog-icon">⚙️</span>
+            <span class="settings-label-mobile">Settings & Options</span>
+          </button>
           <div id="settings-dropdown" class="settings-dropdown">
             <button id="switch-student-menu-btn" class="menu-item" onclick="openLoginOverlay()">
               <span class="menu-item-icon">👤</span> Switch Student Profile
