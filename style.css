@@ -2146,8 +2146,12 @@ body.retro-theme .menu-item:hover {
 }
 
 body.retro-theme .rank-badge-container {
-  background: rgba(181, 137, 0, 0.06);
-  border-color: rgba(181, 137, 0, 0.18);
+  background: #eee8d5;
+  border: 1px solid rgba(181, 137, 0, 0.22);
+}
+
+body.retro-theme .rank-label {
+  color: #657b83;
 }
 
 body.retro-theme .rank-badge {
