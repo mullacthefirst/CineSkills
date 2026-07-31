@@ -10,7 +10,6 @@
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -71,8 +70,15 @@
               <span class="menu-item-icon">👩‍🏫</span> Educator Class View
             </button>
             <hr class="menu-divider">
+            <div class="menu-section-header">Local Data & Backup</div>
+            <button id="export-json-btn" class="menu-item" onclick="exportData()">
+              <span class="menu-item-icon">💾</span> Export Backup (JSON)
+            </button>
+            <button id="import-json-btn" class="menu-item" onclick="triggerImportJSON()">
+              <span class="menu-item-icon">📂</span> Import Backup (JSON)
+            </button>
             <button id="export-pdf-btn" class="menu-item" onclick="exportPDF()">
-              <span class="menu-item-icon">📥</span> Download PDF Report
+              <span class="menu-item-icon">📑</span> Download PDF Report
             </button>
             <button id="reset-progress-btn" class="menu-item text-danger" onclick="confirmResetProgress()" style="color: var(--color-locked);">
               <span class="menu-item-icon">⚠️</span> Reset Progress
@@ -248,10 +254,17 @@
           <hr class="menu-divider" style="margin: 20px 0;">
           
           <div class="crew-card-actions-container" style="width: 100%;">
-            <span class="rank-label" style="display: block; margin-bottom: 8px;">Crew Card Exchange</span>
-            <div style="display: flex; gap: 10px;">
-              <button class="btn-utility" style="flex: 1; justify-content: center; font-size: 0.8rem;" onclick="exportCrewCard()">📤 Export Card</button>
-              <button class="btn-utility" style="flex: 1; justify-content: center; font-size: 0.8rem;" onclick="triggerCrewCardImport()">📥 Import Card</button>
+            <span class="rank-label" style="display: block; margin-bottom: 8px;">Local Backup & Card Exchange</span>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; gap: 8px;">
+                <button class="btn-utility" style="flex: 1; justify-content: center; font-size: 0.8rem;" onclick="exportData()">💾 Export Backup</button>
+                <button class="btn-utility" style="flex: 1; justify-content: center; font-size: 0.8rem;" onclick="triggerImportJSON()">📂 Import Backup</button>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn-utility" style="flex: 1; justify-content: center; font-size: 0.75rem; opacity: 0.8;" onclick="exportCrewCard()">📤 Card Only</button>
+                <button class="btn-utility" style="flex: 1; justify-content: center; font-size: 0.75rem; opacity: 0.8;" onclick="triggerCrewCardImport()">📥 Card Only</button>
+              </div>
+              <input type="file" id="import-json-file-input" accept=".json" style="display: none;" onchange="importData(event)">
               <input type="file" id="import-crew-card-file" accept=".json" style="display: none;" onchange="importCrewCard(event)">
             </div>
           </div>

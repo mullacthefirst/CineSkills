@@ -1,11 +1,11 @@
 // Main Application Entry Point for CineSkills (ES6 Modules)
 import { currentState, saveStudentProgress, getDirectorRank, calculateArchetype } from './state.js';
 import { renderSkillMatrix, toggleTierSection, cycleSkillLevel, openSkillDetail, setModalCompetencyLevel, handleNotesInput, closeModal } from './matrix.js';
-import { renderProfileView, savePortfolioBio, updateShowreel, openAddProjectModal, closeAddProjectModal, handleAddProjectSubmit, deletePortfolioProject, exportData, importData, exportPDF } from './profile.js';
+import { renderProfileView, savePortfolioBio, updateShowreel, openAddProjectModal, closeAddProjectModal, handleAddProjectSubmit, deletePortfolioProject, exportData, importData, triggerImportJSON, exportPDF } from './profile.js';
 import { logProgressHistory } from './charts.js';
 import { renderGearView, renderLicenseDashboard, downloadCertificate } from './gear.js';
 import { renderQuestsView, renderInspirationView, getQuestBonusXp, startMicroQuiz, nextQuizStep, applyQuizRecommendation, claimQuestReward, ACHIEVEMENT_BADGES, renderAchievements, checkAchievementUnlocks } from './quests.js';
-import { initSupabase, syncProgressToCloud, pullProgressFromCloud, openTeacherDashboardModal, configureCloudSyncPrompt, hashStudentId } from './sync.js';
+import { openTeacherDashboardModal, hashStudentId } from './sync.js';
 
 let targetX = 0, targetY = 0, curX = 0, curY = 0;
 let deferredPrompt = null;
@@ -48,9 +48,6 @@ function init() {
         .catch(err => console.warn('[PWA] Service Worker registration failed:', err));
     });
   }
-
-  // Initialize optional Supabase Cloud Sync
-  initSupabase();
 
   const activeStudentSession = getActiveStudentId();
   const activeStudentName = getActiveStudentName();
@@ -608,18 +605,6 @@ export async function handleLogin(event) {
   loadStudentProgress(sessionStudentId);
   closeLoginOverlay();
 
-  // Background cloud restore
-  pullProgressFromCloud(currentState.selectedStudent).then(cloudProgress => {
-    if (cloudProgress) {
-      currentState.progress = cloudProgress;
-      saveStudentProgress();
-      updateDashboard();
-      renderSkillMatrix();
-    }
-  }).catch(err => {
-    console.warn("[Login] Background cloud pull skipped:", err);
-  });
-
   return false;
 }
 
@@ -699,8 +684,6 @@ export async function handleRegister(event) {
 
   loadStudentProgress(sessionStudentId);
   closeLoginOverlay();
-
-  syncProgressToCloud();
 
   return false;
 }
@@ -927,8 +910,12 @@ window.cycleSkillLevel = (e, catId, skillName) => cycleSkillLevel(e, catId, skil
 window.openSkillDetail = openSkillDetail;
 window.setModalCompetencyLevel = (level) => setModalCompetencyLevel(level, updateDashboard);
 window.handleNotesInput = handleNotesInput;
-window.closeModal = closeModal;
+window.exportData = exportData;
+window.importData = importData;
+window.triggerImportJSON = triggerImportJSON;
 window.exportPDF = exportPDF;
+window.loadStudentProgress = loadStudentProgress;
+window.renderProfileView = renderProfileView;
 window.handleSignOut = handleSignOut;
 window.confirmResetProgress = confirmResetProgress;
 window.closeResetModal = closeResetModal;
@@ -950,8 +937,6 @@ window.claimQuestReward = (id) => claimQuestReward(id, updateDashboard);
 window.toggleEmojiPicker = toggleEmojiPicker;
 window.selectProfileEmoji = selectProfileEmoji;
 window.openTeacherDashboardModal = openTeacherDashboardModal;
-window.configureCloudSyncPrompt = configureCloudSyncPrompt;
-window.syncProgressToCloud = syncProgressToCloud;
 
 window.promptInstallPWA = function() {
   if (deferredPrompt) {

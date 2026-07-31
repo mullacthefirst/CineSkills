@@ -1,5 +1,5 @@
 // CineSkills Service Worker — 100% Offline Capability (Network First with Cache Fallback)
-const CACHE_NAME = "cineskills-v20";
+const CACHE_NAME = "cineskills-v21";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -45,7 +45,7 @@ self.addEventListener("activate", (event) => {
 
 // Fetch Event — Network First with Offline Cache Fallback strategy
 self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET" || event.request.url.includes("supabase.co")) {
+  if (event.request.method !== "GET") {
     return;
   }
 

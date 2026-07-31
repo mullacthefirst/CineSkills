@@ -58,19 +58,18 @@ Once opened, the Service Worker caches all skills, icons, and CSS locally. Stude
 
 ---
 
-## 👩‍🏫 Optional Educator Cloud Sync (Supabase Free Tier)
+## 💾 Local Data Saving & JSON Backup System
 
-To view real-time progress for all 20+ students in an **Educator Matrix Overview**:
-1. Create a free account at [supabase.com](https://supabase.com) ($0/mo free tier).
-2. Create a table named `cineskills_student_progress`:
-   ```sql
-   create table cineskills_student_progress (
-     student_id text primary key,
-     student_name text,
-     progress_json jsonb,
-     xp integer,
-     mastered_count integer,
-     updated_at timestamp with time zone default timezone('utc'::text, now())
-   );
-   ```
-3. In CineSkills, open **⚙️ Settings** -> **👩‍🏫 Educator Class View** -> **⚙️ Cloud Setup** and enter your Supabase URL & Anon Key.
+CineSkills operates **100% locally and offline**. All student progress, notes, production projects, gear bookings, and unlocked achievements are saved directly to browser `localStorage`.
+
+### 1. Manual Backup Export & Transfer
+* Open **⚙️ Settings** -> **💾 Export Backup (JSON)** (or click **💾 Export Backup** on your Student Profile).
+* Downloads a single `.json` file containing all student progress, portfolio projects, showreel links, notes, and achievements.
+
+### 2. Restoring or Switching Devices
+* On a new phone, laptop, or tablet, open **⚙️ Settings** -> **📂 Import Backup (JSON)**.
+* Select the exported `.json` backup file to instantly restore all student data locally.
+
+### 3. Educator Class Overview
+* Open **⚙️ Settings** -> **👩‍🏫 Educator Class View** (Default Passcode: `1234`).
+* Summarizes and ranks local student competency profiles stored on the current device.

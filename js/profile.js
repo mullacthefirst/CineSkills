@@ -345,6 +345,14 @@ export function renderProfileView() {
   renderProjectsList();
 }
 
+export function triggerImportJSON() {
+  const input = document.getElementById("import-json-file-input");
+  if (input) {
+    input.value = "";
+    input.click();
+  }
+}
+
 export function exportData() {
   const studentId = currentState.selectedStudent;
   if (!studentId) {
@@ -352,55 +360,106 @@ export function exportData() {
     return;
   }
   const studentName = sessionStorage.getItem("cineskills_active_student_name") || "Student";
-  const progress = currentState.progress;
+  const progress = currentState.progress || {};
+
+  const bio = localStorage.getItem(`cineskills_portfolio_bio_${studentId}`) || "";
+  const showreel = localStorage.getItem(`cineskills_portfolio_showreel_${studentId}`) || "";
+  const projectsRaw = localStorage.getItem(`cineskills_portfolio_projects_${studentId}`);
+  const projects = projectsRaw ? JSON.parse(projectsRaw) : [];
+  const gearBookingsRaw = localStorage.getItem(`cineskills_gear_bookings_${studentId}`);
+  const gearBookings = gearBookingsRaw ? JSON.parse(gearBookingsRaw) : [];
+  const achievementsRaw = localStorage.getItem(`cineskills_unlocked_achievements_${studentId}`);
+  const achievements = achievementsRaw ? JSON.parse(achievementsRaw) : [];
+  const historyRaw = localStorage.getItem(`cineskills_history_${studentId}`);
+  const history = historyRaw ? JSON.parse(historyRaw) : [];
+  const emoji = localStorage.getItem(`cineskills_emoji_${studentId}`) || "👤";
 
   const exportPayload = {
+    version: "2.0",
+    exportDate: new Date().toISOString(),
     studentId: studentId,
     studentName: studentName,
-    progress: progress
+    emoji: emoji,
+    progress: progress,
+    bio: bio,
+    showreel: showreel,
+    projects: projects,
+    gearBookings: gearBookings,
+    achievements: achievements,
+    history: history
   };
 
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportPayload, null, 2));
   const downloadAnchor = document.createElement("a");
   downloadAnchor.setAttribute("href", dataStr);
-  downloadAnchor.setAttribute("download", `CineSkills_${studentName.replace(/[^a-zA-Z0-9]/g, "_")}_Progress.json`);
+  downloadAnchor.setAttribute("download", `CineSkills_${studentName.replace(/[^a-zA-Z0-9]/g, "_")}_Backup.json`);
   document.body.appendChild(downloadAnchor);
   downloadAnchor.click();
   downloadAnchor.remove();
 }
 
 export function importData(event, loadStudentProgressFn) {
-  if (!event.target.files.length) return;
+  if (!event.target.files || !event.target.files.length) return;
   const fileReader = new FileReader();
   fileReader.onload = function(e) {
     try {
       const imported = JSON.parse(e.target.result);
       
-      if (imported.studentId && imported.progress) {
-        sessionStorage.setItem("cineskills_active_student_id", imported.studentId);
-        sessionStorage.setItem("cineskills_active_student_name", imported.studentName || "Student");
-        localStorage.setItem(`cineskills_progress_${imported.studentId}`, JSON.stringify(imported.progress));
-        
-        if (imported.studentName) {
-          const parts = imported.studentName.match(/^(.*?)\s*\((.*?)\)$/);
-          if (parts) {
-            localStorage.setItem("cineskills_student_name", parts[1].trim());
-            localStorage.setItem("cineskills_student_id", parts[2].trim());
-          }
+      if (imported.studentId && (imported.progress || imported.skills)) {
+        const studentId = imported.studentId;
+        const studentName = imported.studentName || "Student";
+        const progress = imported.progress || imported.skills || {};
+
+        sessionStorage.setItem("cineskills_active_student_id", studentId);
+        sessionStorage.setItem("cineskills_active_student_name", studentName);
+        localStorage.setItem("cineskills_last_student_id", studentId);
+        localStorage.setItem("cineskills_last_student_name", studentName);
+        localStorage.setItem("cineskills_student_id", studentId);
+        localStorage.setItem("cineskills_student_name", studentName);
+
+        localStorage.setItem(`cineskills_progress_${studentId}`, JSON.stringify(progress));
+
+        if (imported.bio !== undefined) {
+          localStorage.setItem(`cineskills_portfolio_bio_${studentId}`, imported.bio);
         }
-        
-        currentState.selectedStudent = imported.studentId;
-        const activeStudentName = imported.studentName || "Student";
-        const displayEl = document.getElementById("active-student-display");
-        if (displayEl) {
-          displayEl.textContent = `👤 ${activeStudentName}`;
+        if (imported.showreel !== undefined) {
+          localStorage.setItem(`cineskills_portfolio_showreel_${studentId}`, imported.showreel);
         }
+        if (imported.projects !== undefined) {
+          localStorage.setItem(`cineskills_portfolio_projects_${studentId}`, JSON.stringify(imported.projects));
+        }
+        if (imported.gearBookings !== undefined) {
+          localStorage.setItem(`cineskills_gear_bookings_${studentId}`, JSON.stringify(imported.gearBookings));
+        }
+        if (imported.achievements !== undefined) {
+          localStorage.setItem(`cineskills_unlocked_achievements_${studentId}`, JSON.stringify(imported.achievements));
+        }
+        if (imported.history !== undefined) {
+          localStorage.setItem(`cineskills_history_${studentId}`, JSON.stringify(imported.history));
+        }
+        if (imported.emoji) {
+          localStorage.setItem(`cineskills_emoji_${studentId}`, imported.emoji);
+        }
+
+        currentState.selectedStudent = studentId;
         
-        if (typeof loadStudentProgressFn === 'function') loadStudentProgressFn(imported.studentId);
-        alert(`Successfully imported progress for ${activeStudentName}!`);
+        if (typeof window.loadStudentProgress === 'function') {
+          window.loadStudentProgress(studentId);
+        } else if (typeof loadStudentProgressFn === 'function') {
+          loadStudentProgressFn(studentId);
+        }
+
+        if (typeof window.renderProfileView === 'function') {
+          window.renderProfileView();
+        }
+
+        alert(`✅ Successfully imported backup for ${studentName}!`);
+      } else {
+        alert("❌ Invalid CineSkills backup file format. Missing required student data.");
       }
     } catch (err) {
-      alert("Failed to parse the file. Please upload a valid JSON backup.");
+      console.error("Import error:", err);
+      alert("❌ Failed to parse backup file. Please upload a valid CineSkills JSON backup.");
     }
   };
   fileReader.readAsText(event.target.files[0]);

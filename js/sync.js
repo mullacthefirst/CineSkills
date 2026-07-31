@@ -1,37 +1,7 @@
-// CineSkills Cloud Sync & Teacher Dashboard System (Supabase / Free Tier Sync)
-import { currentState, saveStudentProgress } from './state.js';
+// CineSkills Local System & Teacher Dashboard (100% Local / Offline)
+import { currentState } from './state.js';
 
-// Default Classroom Supabase Credentials (Pre-configured by Lecturer)
-export const DEFAULT_SUPABASE_URL = "https://xronqdapgcqezmwrwdap.supabase.co";
-export const DEFAULT_SUPABASE_KEY = "sb_publishable_sAwlb2pRYhg8ffYhMFDrEA_eyO_S8_4";
-
-let SUPABASE_URL = localStorage.getItem("cineskills_supabase_url") || DEFAULT_SUPABASE_URL;
-let SUPABASE_KEY = localStorage.getItem("cineskills_supabase_key") || DEFAULT_SUPABASE_KEY;
-let supabaseClient = null;
-
-export function initSupabase() {
-  let rawUrl = localStorage.getItem("cineskills_supabase_url") || DEFAULT_SUPABASE_URL;
-  let rawKey = localStorage.getItem("cineskills_supabase_key") || DEFAULT_SUPABASE_KEY;
-
-  // Clean trailing /rest/v1 or trailing slashes if present
-  if (rawUrl) {
-    rawUrl = rawUrl.replace(/\/rest\/v1\/?$/, "").replace(/\/+$/, "");
-  }
-
-  SUPABASE_URL = rawUrl;
-  SUPABASE_KEY = rawKey;
-
-  if (SUPABASE_URL && SUPABASE_KEY && window.supabase) {
-    try {
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      console.log("[Cloud Sync] Supabase initialized successfully with base URL:", SUPABASE_URL);
-    } catch (e) {
-      console.warn("[Cloud Sync] Failed to initialize Supabase client", e);
-    }
-  }
-}
-
-// GDPR Compliance: Cryptographic SHA-256 Pseudonymization Helper
+// GDPR Compliance: Cryptographic SHA-256 Pseudonymization / Password Hashing Helper
 export async function hashStudentId(rawId) {
   if (!rawId) return "anon_guest";
   try {
@@ -50,145 +20,8 @@ export async function hashStudentId(rawId) {
   }
 }
 
-let syncDebounceTimer = null;
-
-// Sync progress to cloud database (Debounced & 100% GDPR Pseudonymized)
-export function syncProgressToCloud() {
-  if (syncDebounceTimer) {
-    clearTimeout(syncDebounceTimer);
-  }
-
-  updateCloudSyncStatusIndicator("saving");
-
-  syncDebounceTimer = setTimeout(async () => {
-    if (!supabaseClient) {
-      initSupabase();
-    }
-
-    const rawStudentId = currentState.selectedStudent;
-    if (!rawStudentId || !supabaseClient) {
-      updateCloudSyncStatusIndicator("offline");
-      return;
-    }
-
-    // Hash Student ID & create anonymous alias for GDPR Compliance (zero PII sent to 3rd party)
-    const anonymizedCloudId = await hashStudentId(rawStudentId);
-    const anonymizedDisplayName = `Student #${anonymizedCloudId.substring(5, 11).toUpperCase()}`;
-
-    const progress = currentState.progress || {};
-
-    let earnedXp = 0;
-    let masteredCount = 0;
-    if (window.CINESKILLS_DATABASE && window.CINESKILLS_DATABASE.categories) {
-      window.CINESKILLS_DATABASE.categories.forEach(cat => {
-        cat.skills.forEach(skill => {
-          const state = progress[skill.name];
-          if (state && state.level === 2) {
-            earnedXp += skill.xp;
-            masteredCount++;
-          } else if (state && state.level === 1) {
-            earnedXp += skill.xp * 0.5;
-          }
-        });
-      });
-    }
-
-    try {
-      const { data, error } = await supabaseClient
-        .from('cineskills_student_progress')
-        .upsert({
-          student_id: anonymizedCloudId,
-          student_name: anonymizedDisplayName,
-          progress_json: progress,
-          xp: earnedXp,
-          mastered_count: masteredCount,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'student_id' });
-
-      if (error) {
-        console.error("[Cloud Sync] Database error during sync:", error.message);
-        updateCloudSyncStatusIndicator("error");
-      } else {
-        console.log("[Cloud Sync] GDPR Pseudonymized progress synced for:", anonymizedDisplayName);
-        updateCloudSyncStatusIndicator("synced");
-      }
-    } catch (err) {
-      console.error("[Cloud Sync] Exception during cloud sync:", err);
-      updateCloudSyncStatusIndicator("error");
-    }
-  }, 1200); // 1.2 second debounce
-}
-
-// Pull progress from cloud database with multi-tier fallback for data recovery
-export async function pullProgressFromCloud(rawStudentId) {
-  if (!rawStudentId || !supabaseClient) return null;
-
-  try {
-    const anonymizedCloudId = await hashStudentId(rawStudentId);
-    
-    // Tier 1: Query by anonymized SHA-256 cloud ID
-    const { data: anonData } = await supabaseClient
-      .from('cineskills_student_progress')
-      .select('*')
-      .eq('student_id', anonymizedCloudId)
-      .maybeSingle();
-
-    if (anonData && anonData.progress_json) {
-      console.log("[Cloud Sync] Pulled student progress from cloud (anonymized ID)");
-      return anonData.progress_json;
-    }
-
-    // Tier 2: Query by raw student ID (for legacy data migration)
-    const { data: rawData } = await supabaseClient
-      .from('cineskills_student_progress')
-      .select('*')
-      .eq('student_id', rawStudentId)
-      .maybeSingle();
-
-    if (rawData && rawData.progress_json) {
-      console.log("[Cloud Sync] Pulled legacy student progress from cloud! Migrating to anonymized ID...");
-      return rawData.progress_json;
-    }
-
-    // Tier 3: Query by active student name (if available in session)
-    const activeName = sessionStorage.getItem("cineskills_active_student_name") || localStorage.getItem("cineskills_last_student_name") || localStorage.getItem("cineskills_student_name");
-    if (activeName) {
-      const { data: nameData } = await supabaseClient
-        .from('cineskills_student_progress')
-        .select('*')
-        .eq('student_name', activeName)
-        .maybeSingle();
-
-      if (nameData && nameData.progress_json) {
-        console.log("[Cloud Sync] Pulled student progress from cloud by name!");
-        return nameData.progress_json;
-      }
-    }
-  } catch (err) {
-    console.warn("[Cloud Sync] Unable to pull cloud data:", err);
-  }
-  return null;
-}
-
-// Educator / Teacher Overview Dashboard
+// Local Educator / Teacher Overview Data Aggregator
 export async function fetchTeacherClassroomData() {
-  if (!supabaseClient) {
-    return getLocalTeacherClassroomData();
-  }
-
-  try {
-    const { data, error } = await supabaseClient
-      .from('cineskills_student_progress')
-      .select('*')
-      .order('xp', { ascending: false });
-
-    if (data && data.length > 0) {
-      return data;
-    }
-  } catch (err) {
-    console.warn("[Teacher Mode] Cloud data unavailable, using local session records:", err);
-  }
-
   return getLocalTeacherClassroomData();
 }
 
@@ -209,16 +42,18 @@ function getLocalTeacherClassroomData() {
 
         let xp = 0;
         let mastered = 0;
-        CINESKILLS_DATABASE.categories.forEach(cat => {
-          cat.skills.forEach(s => {
-            if (progress[s.name] && progress[s.name].level === 2) {
-              xp += s.xp;
-              mastered++;
-            } else if (progress[s.name] && progress[s.name].level === 1) {
-              xp += s.xp * 0.5;
-            }
+        if (window.CINESKILLS_DATABASE && window.CINESKILLS_DATABASE.categories) {
+          window.CINESKILLS_DATABASE.categories.forEach(cat => {
+            cat.skills.forEach(s => {
+              if (progress[s.name] && progress[s.name].level === 2) {
+                xp += s.xp;
+                mastered++;
+              } else if (progress[s.name] && progress[s.name].level === 1) {
+                xp += s.xp * 0.5;
+              }
+            });
           });
-        });
+        }
 
         studentsList.push({
           student_id: studentId,
@@ -251,54 +86,6 @@ function getLocalTeacherClassroomData() {
   return studentsList;
 }
 
-// Quiet Cloud Status Indicator in Navbar (Replaces intrusive Toast popups)
-export function updateCloudSyncStatusIndicator(status) {
-  let badge = document.getElementById("cloud-sync-status-badge");
-  if (!badge) {
-    const parent = document.querySelector(".nav-controls");
-    if (parent) {
-      badge = document.createElement("span");
-      badge.id = "cloud-sync-status-badge";
-      badge.style.fontSize = "0.75rem";
-      badge.style.padding = "4px 10px";
-      badge.style.borderRadius = "12px";
-      badge.style.transition = "all 0.3s ease";
-      badge.style.display = "inline-flex";
-      badge.style.alignItems = "center";
-      badge.style.gap = "4px";
-      badge.style.marginLeft = "4px";
-      parent.insertBefore(badge, parent.firstChild);
-    }
-  }
-
-  if (!badge) return;
-
-  if (status === "saving") {
-    badge.innerHTML = "☁️ <em>Saving...</em>";
-    badge.style.background = "rgba(59, 130, 246, 0.15)";
-    badge.style.color = "var(--accent-blue)";
-    badge.style.opacity = "1";
-  } else if (status === "synced") {
-    badge.innerHTML = "☁️ <strong>Synced</strong>";
-    badge.style.background = "rgba(16, 185, 129, 0.15)";
-    badge.style.color = "var(--color-completed)";
-    badge.style.opacity = "1";
-    setTimeout(() => {
-      badge.style.opacity = "0.5";
-    }, 2000);
-  } else if (status === "offline") {
-    badge.innerHTML = "📱 Offline";
-    badge.style.background = "rgba(255, 255, 255, 0.05)";
-    badge.style.color = "var(--text-muted)";
-    badge.style.opacity = "0.6";
-  } else if (status === "error") {
-    badge.innerHTML = "⚠️ Sync Error";
-    badge.style.background = "rgba(239, 68, 68, 0.15)";
-    badge.style.color = "var(--color-locked)";
-    badge.style.opacity = "1";
-  }
-}
-
 // Render Teacher / Educator Dashboard Modal
 export async function openTeacherDashboardModal() {
   const storedPin = localStorage.getItem("cineskills_teacher_pin") || "1234";
@@ -324,9 +111,8 @@ export async function openTeacherDashboardModal() {
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--panel-border); padding-bottom: 12px; margin-bottom: 16px;">
         <div>
           <h2 class="login-title" style="margin:0;">👩‍🏫 Educator Class Overview</h2>
-          <p class="login-subtitle" style="margin: 4px 0 0 0;">Real-time student progress matrix & class competency leaderboard.</p>
+          <p class="login-subtitle" style="margin: 4px 0 0 0;">Local student progress matrix & class competency leaderboard.</p>
         </div>
-        <button class="btn-utility" style="font-size: 0.8rem;" onclick="configureCloudSyncPrompt()">⚙️ Cloud Setup</button>
       </div>
 
       <div id="teacher-modal-body" style="max-height: 450px; overflow-y: auto;">
@@ -341,7 +127,7 @@ export async function openTeacherDashboardModal() {
   const bodyEl = document.getElementById("teacher-modal-body");
 
   if (!studentsData || studentsData.length === 0) {
-    bodyEl.innerHTML = `<div style="text-align: center; padding: 32px; color: var(--text-muted);">No student records found.</div>`;
+    bodyEl.innerHTML = `<div style="text-align: center; padding: 32px; color: var(--text-muted);">No student records found on this device.</div>`;
     return;
   }
 
@@ -359,7 +145,7 @@ export async function openTeacherDashboardModal() {
       <tbody>
   `;
 
-  const totalPossibleXp = 2400; // 120 skills * average XP
+  const totalPossibleXp = 2400;
 
   studentsData.forEach((st, idx) => {
     const pct = Math.round((st.xp / totalPossibleXp) * 100);
@@ -389,26 +175,8 @@ export async function openTeacherDashboardModal() {
   bodyEl.innerHTML = tableHtml;
 }
 
-export function configureCloudSyncPrompt() {
-  const currentUrl = localStorage.getItem("cineskills_supabase_url") || "";
-  const currentKey = localStorage.getItem("cineskills_supabase_key") || "";
-  const currentPin = localStorage.getItem("cineskills_teacher_pin") || "1234";
+// Stubs for backwards compatibility (Local/Offline mode)
+export function syncProgressToCloud() {}
+export async function pullProgressFromCloud() { return null; }
+export function updateCloudSyncStatusIndicator() {}
 
-  const pin = prompt("Set your Educator Passcode (Default: 1234):", currentPin);
-  if (pin === null) return;
-  const url = prompt("Enter your free Supabase Project URL (or leave blank to use Local/PWA mode):", currentUrl);
-  if (url === null) return;
-  const key = prompt("Enter your free Supabase Anon Key:", currentKey);
-  if (key === null) return;
-
-  localStorage.setItem("cineskills_teacher_pin", pin.trim() || "1234");
-  localStorage.setItem("cineskills_supabase_url", url.trim());
-  localStorage.setItem("cineskills_supabase_key", key.trim());
-
-  SUPABASE_URL = url.trim();
-  SUPABASE_KEY = key.trim();
-  initSupabase();
-  syncProgressToCloud();
-
-  alert("Educator settings updated! Your passcode and cloud sync parameters have been saved.");
-}

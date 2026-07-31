@@ -121,7 +121,4 @@ export function calculateArchetype(categoryStats, overallPct) {
 export function saveStudentProgress() {
   const localKey = `cineskills_progress_${currentState.selectedStudent}`;
   localStorage.setItem(localKey, JSON.stringify(currentState.progress));
-  if (typeof window.syncProgressToCloud === 'function') {
-    window.syncProgressToCloud();
-  }
 }
