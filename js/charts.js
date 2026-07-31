@@ -154,6 +154,7 @@ export function drawTimelineChart(currentPct) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   const isLightOrRetro = document.body.classList.contains("light-theme") || document.body.classList.contains("retro-theme");
+  const isLightTheme = document.body.classList.contains("light-theme");
   
   const historyKey = `cineskills_history_${currentState.selectedStudent}`;
   let history = [];

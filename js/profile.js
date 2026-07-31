@@ -263,8 +263,8 @@ export function renderProfileView() {
     dossierArchetypeBadge.innerHTML = `${archetype.emoji} <strong>${archetype.title}</strong>`;
   }
 
-  drawRadarChart(categoryStats);
-  drawTimelineChart(pct);
+  try { drawRadarChart(categoryStats); } catch (e) { console.error("Error drawing radar chart:", e); }
+  try { drawTimelineChart(pct); } catch (e) { console.error("Error drawing timeline chart:", e); }
   renderAchievements(categoryStats);
 
   if (milestonesList) {
@@ -568,4 +568,21 @@ export function exportPDF() {
   
   printContainer.innerHTML = printHtml;
   window.print();
+}
+
+export function exportCrewCard() {
+  exportData();
+}
+
+export function triggerCrewCardImport() {
+  triggerImportJSON();
+}
+
+export function importCrewCard(event) {
+  importData(event);
+}
+
+export function closeCrewCardModal() {
+  const modal = document.getElementById("crew-card-modal");
+  if (modal) modal.classList.remove("active");
 }
