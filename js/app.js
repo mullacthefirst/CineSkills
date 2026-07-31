@@ -474,10 +474,16 @@ export function renderSavedLocalProfiles() {
   list.innerHTML = "";
   profiles.forEach(p => {
     const isCurrent = p.id === currentState.selectedStudent;
+    const row = document.createElement("div");
+    row.style.display = "flex";
+    row.style.gap = "8px";
+    row.style.alignItems = "center";
+    row.style.width = "100%";
+
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = `btn-utility ${isCurrent ? 'active' : ''}`;
-    btn.style.width = "100%";
+    btn.style.flex = "1";
     btn.style.justifyContent = "space-between";
     btn.style.padding = "10px 14px";
     btn.style.fontSize = "0.85rem";
@@ -485,8 +491,41 @@ export function renderSavedLocalProfiles() {
     btn.style.borderColor = isCurrent ? "var(--accent-blue)" : "var(--panel-border)";
     btn.innerHTML = `<span>👤 <strong>${p.name}</strong> (${p.id})</span><span>${isCurrent ? 'Active ✓' : 'Switch ➔'}</span>`;
     btn.onclick = () => switchProfileTo(p.id, p.name);
-    list.appendChild(btn);
+
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "btn-utility";
+    delBtn.style.padding = "10px 12px";
+    delBtn.style.color = "var(--color-locked)";
+    delBtn.style.borderColor = "var(--color-locked-border)";
+    delBtn.title = "Delete local profile from device";
+    delBtn.innerHTML = "🗑️";
+    delBtn.onclick = (e) => deleteLocalProfile(p.id, p.name, e);
+
+    row.appendChild(btn);
+    row.appendChild(delBtn);
+    list.appendChild(row);
   });
+}
+
+export function deleteLocalProfile(id, name, event) {
+  if (event) event.stopPropagation();
+  if (confirm(`Are you sure you want to delete profile "${name}" (${id}) from this device?`)) {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key && key.includes(id)) {
+        localStorage.removeItem(key);
+      }
+    }
+    if (currentState.selectedStudent === id) {
+      sessionStorage.removeItem("cineskills_active_student_id");
+      sessionStorage.removeItem("cineskills_active_student_name");
+      localStorage.removeItem("cineskills_last_student_id");
+      localStorage.removeItem("cineskills_last_student_name");
+      currentState.selectedStudent = "";
+    }
+    renderSavedLocalProfiles();
+  }
 }
 
 export function switchProfileTo(id, name) {
@@ -909,6 +948,7 @@ window.openLoginOverlay = openLoginOverlay;
 window.closeLoginOverlay = closeLoginOverlay;
 window.handleProfileSubmit = handleProfileSubmit;
 window.switchProfileTo = switchProfileTo;
+window.deleteLocalProfile = deleteLocalProfile;
 window.setMatrixLayout = setMatrixLayout;
 window.toggleTierSection = toggleTierSection;
 window.cycleSkillLevel = (e, catId, skillName) => cycleSkillLevel(e, catId, skillName, updateDashboard);
