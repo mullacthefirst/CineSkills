@@ -425,7 +425,14 @@ h1, h2, h3, h4, h5, h6 {
 .category-header {
   margin-bottom: 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  padding-bottom: 14px;
+  padding-bottom: 16px;
+}
+
+.category-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
 }
 
 .category-header h3 {
@@ -433,12 +440,41 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 4px;
+  margin: 0;
+}
+
+.category-pct-badge {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent-blue);
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 4px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.02em;
 }
 
 .category-desc {
   font-size: 0.85rem;
   color: var(--text-secondary);
+}
+
+.category-progress-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.category-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, hsl(270, 100%, 65%), var(--accent-blue));
+  border-radius: 6px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tier-subsection {
@@ -1361,6 +1397,21 @@ body.light-theme .progress-track-mini {
   background: rgba(0, 0, 0, 0.05);
 }
 
+body.light-theme .category-pct-badge {
+  color: #0284c7;
+  background: rgba(2, 132, 199, 0.1);
+  border-color: rgba(2, 132, 199, 0.2);
+}
+
+body.light-theme .category-progress-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .category-progress-fill {
+  background: #0284c7;
+}
+
 body.light-theme .category-stat-row {
   background: rgba(0, 0, 0, 0.01);
   border: 1px solid rgba(0, 0, 0, 0.02);
@@ -2103,6 +2154,21 @@ body.retro-theme .rank-badge {
 body.retro-theme .progress-track,
 body.retro-theme .progress-track-mini {
   background: rgba(181, 137, 0, 0.15);
+}
+
+body.retro-theme .category-pct-badge {
+  color: #b58900;
+  background: rgba(181, 137, 0, 0.12);
+  border-color: rgba(181, 137, 0, 0.3);
+}
+
+body.retro-theme .category-progress-track {
+  background: rgba(181, 137, 0, 0.15);
+  border-color: rgba(181, 137, 0, 0.25);
+}
+
+body.retro-theme .category-progress-fill {
+  background: linear-gradient(90deg, #cb4b16, #b58900);
 }
 
 body.retro-theme .category-stat-row {

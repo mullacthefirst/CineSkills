@@ -176,14 +176,14 @@ export function renderSkillMatrix() {
 
     catSection.innerHTML = `
       <div class="category-header">
-        <div class="category-header-top" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <h3 style="margin: 0;">${cat.emoji} ${cat.name}</h3>
-          <span class="category-pct-badge" style="font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--accent-blue); background: rgba(255,255,255,0.06); padding: 3px 10px; border-radius: 12px; border: 1px solid var(--panel-border);">${catPct}%</span>
-        </div>
-        <div class="progress-track-mini" style="margin-bottom: 12px;">
-          <div class="progress-bar-mini" style="width: ${catPct}%;"></div>
+        <div class="category-header-top">
+          <h3>${cat.emoji} ${cat.name}</h3>
+          <span class="category-pct-badge">${catPct}% Complete</span>
         </div>
         <p class="category-desc">${cat.description}</p>
+        <div class="category-progress-track">
+          <div class="category-progress-fill" style="width: ${catPct}%;"></div>
+        </div>
       </div>
       ${bodyHtml}
     `;
