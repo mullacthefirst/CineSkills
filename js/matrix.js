@@ -21,7 +21,7 @@ export function renderSkillMatrix() {
     }
   }
 
-  const db = window.CINESKILLS_DATABASE || (typeof CINESKILLS_DATABASE !== 'undefined' ? CINESKILLS_DATABASE : null);
+  const db = window.CINESKILLS_DATABASE || (typeof window.CINESKILLS_DATABASE !== 'undefined' ? window.CINESKILLS_DATABASE : null);
   if (!db || !db.categories) return;
 
   db.categories.forEach(cat => {
@@ -202,7 +202,7 @@ export function cycleSkillLevel(event, categoryId, skillName, updateDashboardFn)
 }
 
 export function openSkillDetail(categoryId, skillName) {
-  const cat = CINESKILLS_DATABASE.categories.find(c => c.id === categoryId);
+  const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === categoryId);
   const skill = cat.skills.find(s => s.name === skillName);
   
   activeSkillRef = skill;

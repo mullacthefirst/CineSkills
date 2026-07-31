@@ -16,7 +16,7 @@ export const ACHIEVEMENT_BADGES = [
   },
   { id: "story_architect", name: "Story Architect", emoji: "📖", desc: "Master 3 Story category skills.", check: (stats, progress) => {
       let count = 0;
-      const cat = CINESKILLS_DATABASE.categories.find(c => c.id === "story");
+      const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === "story");
       if (cat) {
         cat.skills.forEach(s => {
           if (progress[s.name] && progress[s.name].level === 2) count++;
@@ -34,7 +34,7 @@ export const ACHIEVEMENT_BADGES = [
   },
   { id: "cinematography_lead", name: "Cinematography Lead", emoji: "🎥", desc: "Master 3 Camera category skills.", check: (stats, progress) => {
       let count = 0;
-      const cat = CINESKILLS_DATABASE.categories.find(c => c.id === "camera");
+      const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === "camera");
       if (cat) {
         cat.skills.forEach(s => {
           if (progress[s.name] && progress[s.name].level === 2) count++;
@@ -45,7 +45,7 @@ export const ACHIEVEMENT_BADGES = [
   },
   { id: "gaffer_master", name: "Gaffer Master", emoji: "💡", desc: "Master 3 Lighting category skills.", check: (stats, progress) => {
       let count = 0;
-      const cat = CINESKILLS_DATABASE.categories.find(c => c.id === "lighting");
+      const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === "lighting");
       if (cat) {
         cat.skills.forEach(s => {
           if (progress[s.name] && progress[s.name].level === 2) count++;
@@ -56,7 +56,7 @@ export const ACHIEVEMENT_BADGES = [
   },
   { id: "sound_sage", name: "Sound Sage", emoji: "🎙️", desc: "Master 3 Audio category skills.", check: (stats, progress) => {
       let count = 0;
-      const cat = CINESKILLS_DATABASE.categories.find(c => c.id === "audio");
+      const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === "audio");
       if (cat) {
         cat.skills.forEach(s => {
           if (progress[s.name] && progress[s.name].level === 2) count++;
@@ -67,7 +67,7 @@ export const ACHIEVEMENT_BADGES = [
   },
   { id: "post_prod_spec", name: "Post-Prod Specialist", emoji: "🎞️", desc: "Master 3 Post-Production category skills.", check: (stats, progress) => {
       let count = 0;
-      const cat = CINESKILLS_DATABASE.categories.find(c => c.id === "post-production");
+      const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === "post-production");
       if (cat) {
         cat.skills.forEach(s => {
           if (progress[s.name] && progress[s.name].level === 2) count++;
@@ -86,7 +86,7 @@ export const ACHIEVEMENT_BADGES = [
   },
   { id: "producer_guild", name: "Producer's Guild", emoji: "📋", desc: "Master 3 Management category skills.", check: (stats, progress) => {
       let count = 0;
-      const cat = CINESKILLS_DATABASE.categories.find(c => c.id === "management");
+      const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === "management");
       if (cat) {
         cat.skills.forEach(s => {
           if (progress[s.name] && progress[s.name].level === 2) count++;
@@ -97,7 +97,7 @@ export const ACHIEVEMENT_BADGES = [
   },
   { id: "industry_ready", name: "Industry Ready", emoji: "💼", desc: "Master 3 Professional Practice skills.", check: (stats, progress) => {
       let count = 0;
-      const cat = CINESKILLS_DATABASE.categories.find(c => c.id === "professional-practice");
+      const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === "professional-practice");
       if (cat) {
         cat.skills.forEach(s => {
           if (progress[s.name] && progress[s.name].level === 2) count++;
@@ -108,7 +108,7 @@ export const ACHIEVEMENT_BADGES = [
   },
   { id: "film_scholar", name: "Film Scholar", emoji: "📚", desc: "Master 3 Research category skills.", check: (stats, progress) => {
       let count = 0;
-      const cat = CINESKILLS_DATABASE.categories.find(c => c.id === "research");
+      const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === "research");
       if (cat) {
         cat.skills.forEach(s => {
           if (progress[s.name] && progress[s.name].level === 2) count++;
@@ -119,7 +119,7 @@ export const ACHIEVEMENT_BADGES = [
   },
   { id: "gear_wizard", name: "Gear Wizard", emoji: "🛠️", desc: "Master 3 Technician category skills.", check: (stats, progress) => {
       let count = 0;
-      const cat = CINESKILLS_DATABASE.categories.find(c => c.id === "technician");
+      const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === "technician");
       if (cat) {
         cat.skills.forEach(s => {
           if (progress[s.name] && progress[s.name].level === 2) count++;
@@ -130,7 +130,7 @@ export const ACHIEVEMENT_BADGES = [
   },
   { id: "all_round_auteur", name: "All-Round Auteur", emoji: "🌟", desc: "Master at least 1 skill in all 10 categories.", check: (stats, progress) => {
       let categoriesMastered = 0;
-      CINESKILLS_DATABASE.categories.forEach(cat => {
+      window.CINESKILLS_DATABASE.categories.forEach(cat => {
         const hasMastered = cat.skills.some(s => progress[s.name] && progress[s.name].level === 2);
         if (hasMastered) categoriesMastered++;
       });
@@ -236,7 +236,7 @@ export function renderAchievements(categoryStats) {
 // Micro Quiz System
 export function generateQuiz(skill, category) {
   const allSkills = [];
-  CINESKILLS_DATABASE.categories.forEach(cat => {
+  window.CINESKILLS_DATABASE.categories.forEach(cat => {
     if (cat.id !== category.id) {
       cat.skills.forEach(s => allSkills.push(s));
     }
@@ -290,7 +290,7 @@ export function startMicroQuiz(activeSkillRef) {
   if (!activeSkillRef) return;
   
   let activeCategory = null;
-  CINESKILLS_DATABASE.categories.forEach(cat => {
+  window.CINESKILLS_DATABASE.categories.forEach(cat => {
     if (cat.skills.some(s => s.name === activeSkillRef.name)) {
       activeCategory = cat;
     }
@@ -651,7 +651,7 @@ export function renderInspirationView() {
   recommendationsDiv.innerHTML = "";
   
   const uncompletedSkills = [];
-  CINESKILLS_DATABASE.categories.forEach(cat => {
+  window.CINESKILLS_DATABASE.categories.forEach(cat => {
     cat.skills.forEach(skill => {
       const progress = currentState.progress[skill.name];
       if (!progress || progress.level < 2) {

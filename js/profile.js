@@ -147,7 +147,7 @@ export function openAddProjectModal() {
   const selectGrid = document.getElementById("project-skills-select");
   if (selectGrid) {
     selectGrid.innerHTML = "";
-    CINESKILLS_DATABASE.categories.forEach(cat => {
+    window.CINESKILLS_DATABASE.categories.forEach(cat => {
       cat.skills.forEach(skill => {
         const id = `chk-skill-${skill.name.replace(/\s+/g, '-')}`;
         selectGrid.innerHTML += `
@@ -225,7 +225,7 @@ export function renderProfileView() {
   let totalSkills = 0;
   const categoryStats = {};
 
-  CINESKILLS_DATABASE.categories.forEach(cat => {
+  window.CINESKILLS_DATABASE.categories.forEach(cat => {
     categoryStats[cat.id] = { totalXp: 0, earnedXp: 0 };
     cat.skills.forEach(skill => {
       totalSkills++;
@@ -290,7 +290,7 @@ export function renderProfileView() {
     evidenceLogList.innerHTML = "";
     let hasEvidence = false;
     
-    CINESKILLS_DATABASE.categories.forEach(cat => {
+    window.CINESKILLS_DATABASE.categories.forEach(cat => {
       cat.skills.forEach(skill => {
         const skillState = currentState.progress[skill.name];
         if (skillState && skillState.notes && skillState.notes.trim() !== "") {
@@ -473,7 +473,7 @@ export function exportPDF() {
   let completedCount = 0;
   let totalSkillsCount = 0;
   
-  CINESKILLS_DATABASE.categories.forEach(cat => {
+  window.CINESKILLS_DATABASE.categories.forEach(cat => {
     cat.skills.forEach(skill => {
       maxPossibleXp += skill.xp;
       totalSkillsCount++;
@@ -504,7 +504,7 @@ export function exportPDF() {
     </div>
   `;
   
-  CINESKILLS_DATABASE.categories.forEach(cat => {
+  window.CINESKILLS_DATABASE.categories.forEach(cat => {
     let categoryHtml = `
       <div class="print-category-section">
         <div class="print-category-header">${cat.emoji} ${cat.name}</div>

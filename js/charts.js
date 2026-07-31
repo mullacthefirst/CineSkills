@@ -40,7 +40,7 @@ export function drawRadarChart(categoryStats) {
   const cy = canvas.height / 2;
   const radius = Math.min(canvas.width, canvas.height) / 2 * 0.55;
   
-  const categories = CINESKILLS_DATABASE.categories;
+  const categories = window.CINESKILLS_DATABASE.categories;
   const numAxes = categories.length;
   const angleStep = (Math.PI * 2) / numAxes;
   

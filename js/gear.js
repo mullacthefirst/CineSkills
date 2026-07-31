@@ -2,7 +2,7 @@
 import { currentState, TIER_NAMES } from './state.js';
 
 export function getRequiredSkillsForGear(gear) {
-  const catData = CINESKILLS_DATABASE.categories.find(c => c.id === gear.category);
+  const catData = window.CINESKILLS_DATABASE.categories.find(c => c.id === gear.category);
   if (!catData) return [];
   return catData.skills
     .filter(s => s.tier <= gear.tier)
@@ -10,7 +10,7 @@ export function getRequiredSkillsForGear(gear) {
 }
 
 export function getStudentCategoryLicense(categoryId, progress) {
-  const cat = CINESKILLS_DATABASE.categories.find(c => c.id === categoryId);
+  const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === categoryId);
   if (!cat) return 0;
   
   const skills = cat.skills;
@@ -46,7 +46,7 @@ export function renderLicenseDashboard() {
   categoriesToRender.forEach(catInfo => {
     const licenseLvl = getStudentCategoryLicense(catInfo.id, progress);
     
-    const catData = CINESKILLS_DATABASE.categories.find(c => c.id === catInfo.id);
+    const catData = window.CINESKILLS_DATABASE.categories.find(c => c.id === catInfo.id);
     let nextTierText = "";
     let pct = 0;
     

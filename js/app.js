@@ -141,7 +141,7 @@ function init() {
 
 export function loadStudentProgress(studentId) {
   currentState.isInitialLoad = true;
-  const db = window.CINESKILLS_DATABASE || (typeof CINESKILLS_DATABASE !== 'undefined' ? CINESKILLS_DATABASE : null);
+  const db = window.CINESKILLS_DATABASE || (typeof window.CINESKILLS_DATABASE !== 'undefined' ? window.CINESKILLS_DATABASE : null);
   
   let saved = localStorage.getItem(`cineskills_progress_${studentId}`);
   if (!saved && studentId) {
@@ -211,7 +211,7 @@ export function updateDashboard() {
   
   const categoryStats = {};
   
-  CINESKILLS_DATABASE.categories.forEach(cat => {
+  window.CINESKILLS_DATABASE.categories.forEach(cat => {
     categoryStats[cat.id] = { totalXp: 0, earnedXp: 0 };
     
     cat.skills.forEach(skill => {
@@ -279,7 +279,7 @@ export function updateDashboard() {
   const categoryBreakdown = document.getElementById("category-breakdown");
   if (categoryBreakdown) {
     categoryBreakdown.innerHTML = "";
-    CINESKILLS_DATABASE.categories.forEach(cat => {
+    window.CINESKILLS_DATABASE.categories.forEach(cat => {
       const stats = categoryStats[cat.id];
       const catPct = stats.totalXp > 0 ? Math.round((stats.earnedXp / stats.totalXp) * 100) : 0;
       
@@ -335,7 +335,7 @@ function checkNewAchievements() {
   if (!currentState.selectedStudent) return;
 
   const categoryStats = {};
-  CINESKILLS_DATABASE.categories.forEach(cat => {
+  window.CINESKILLS_DATABASE.categories.forEach(cat => {
     categoryStats[cat.id] = { totalXp: 0, earnedXp: 0 };
     cat.skills.forEach(skill => {
       categoryStats[cat.id].totalXp += skill.xp;
@@ -500,6 +500,7 @@ export function switchProfileTo(id, name) {
   updateStudentHeader();
   loadStudentProgress(id);
   closeLoginOverlay();
+  switchView('matrix');
 }
 
 export function handleProfileSubmit(event) {
@@ -912,6 +913,7 @@ window.setMatrixLayout = setMatrixLayout;
 window.toggleTierSection = toggleTierSection;
 window.cycleSkillLevel = (e, catId, skillName) => cycleSkillLevel(e, catId, skillName, updateDashboard);
 window.openSkillDetail = openSkillDetail;
+window.closeModal = closeModal;
 window.setModalCompetencyLevel = (level) => setModalCompetencyLevel(level, updateDashboard);
 window.handleNotesInput = handleNotesInput;
 window.exportData = exportData;
