@@ -219,6 +219,13 @@ export function renderProfileView() {
   if (dossierStudentName) dossierStudentName.textContent = rawName;
   if (dossierStudentId) dossierStudentId.textContent = rawId;
 
+  const studentId = currentState.selectedStudent || rawId;
+  const emoji = localStorage.getItem(`cineskills_emoji_${studentId}`) || "🎬";
+  const profilePic = document.getElementById("dossier-profile-pic");
+  if (profilePic) {
+    profilePic.innerHTML = `<span class="emoji-content">${emoji}</span>`;
+  }
+
   let earnedXp = 0;
   let maxPossibleXp = 0;
   let completedCount = 0;
@@ -328,7 +335,6 @@ export function renderProfileView() {
     }
   }
 
-  const studentId = currentState.selectedStudent || "callum_oco26000271";
   const bioKey = `cineskills_portfolio_bio_${studentId}`;
   const portfolioBio = document.getElementById("portfolio-bio");
   if (portfolioBio) {

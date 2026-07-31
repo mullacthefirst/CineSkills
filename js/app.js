@@ -914,10 +914,15 @@ export function updateStudentHeader() {
   if (!currentState.selectedStudent) return;
   const studentId = currentState.selectedStudent;
   const activeStudentName = getActiveStudentName();
-  const emoji = localStorage.getItem(`cineskills_emoji_${studentId}`) || "👤";
+  const emoji = localStorage.getItem(`cineskills_emoji_${studentId}`) || "🎬";
   
   const activeStudentDisplay = document.getElementById("active-student-display");
   if (activeStudentDisplay) activeStudentDisplay.textContent = `${emoji} ${activeStudentName}`;
+
+  const profilePic = document.getElementById("dossier-profile-pic");
+  if (profilePic) {
+    profilePic.innerHTML = `<span class="emoji-content">${emoji}</span>`;
+  }
 }
 
 export function toggleEmojiPicker(event) {
