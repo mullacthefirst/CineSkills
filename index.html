@@ -25,11 +25,14 @@
     </div>
 
     <!-- Hamburger Menu Toggle for Mobile -->
-    <button id="hamburger-btn" class="hamburger-btn" aria-label="Toggle navigation" onclick="toggleMobileMenu()">
+    <button id="hamburger-btn" class="hamburger-btn" aria-label="Toggle navigation" aria-expanded="false" onclick="toggleMobileMenu()">
       <span class="hamburger-bar"></span>
       <span class="hamburger-bar"></span>
       <span class="hamburger-bar"></span>
     </button>
+
+    <!-- Mobile Navigation Backdrop Overlay -->
+    <div id="nav-backdrop" class="nav-backdrop" onclick="closeMobileMenu()"></div>
 
     <!-- Responsive Navigation Container -->
     <div id="nav-drawer" class="nav-drawer">

@@ -587,15 +587,37 @@ export function toggleSettingsMenu() {
 export function toggleMobileMenu() {
   const hamburgerBtn = document.getElementById("hamburger-btn");
   const navDrawer = document.getElementById("nav-drawer");
-  if (hamburgerBtn) hamburgerBtn.classList.toggle("active");
-  if (navDrawer) navDrawer.classList.toggle("active");
+  const navBackdrop = document.getElementById("nav-backdrop");
+
+  const isOpen = navDrawer ? navDrawer.classList.contains("active") : false;
+
+  if (isOpen) {
+    closeMobileMenu();
+  } else {
+    if (hamburgerBtn) {
+      hamburgerBtn.classList.add("active");
+      hamburgerBtn.setAttribute("aria-expanded", "true");
+    }
+    if (navDrawer) navDrawer.classList.add("active");
+    if (navBackdrop) navBackdrop.classList.add("active");
+    document.body.classList.add("mobile-nav-open");
+  }
 }
 
 export function closeMobileMenu() {
   const hamburgerBtn = document.getElementById("hamburger-btn");
   const navDrawer = document.getElementById("nav-drawer");
-  if (hamburgerBtn) hamburgerBtn.classList.remove("active");
+  const navBackdrop = document.getElementById("nav-backdrop");
+  const settingsDropdown = document.getElementById("settings-dropdown");
+
+  if (hamburgerBtn) {
+    hamburgerBtn.classList.remove("active");
+    hamburgerBtn.setAttribute("aria-expanded", "false");
+  }
   if (navDrawer) navDrawer.classList.remove("active");
+  if (navBackdrop) navBackdrop.classList.remove("active");
+  if (settingsDropdown) settingsDropdown.classList.remove("active");
+  document.body.classList.remove("mobile-nav-open");
 }
 
 export function selectTheme(themeName) {

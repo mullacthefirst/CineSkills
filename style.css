@@ -4121,20 +4121,50 @@ body.alan-smithee-active .category-section {
    Hamburger Menu & Mobile Responsiveness
    ========================================================================== */
 
+body.mobile-nav-open {
+  overflow: hidden !important;
+}
+
+/* Mobile Navigation Backdrop */
+.nav-backdrop {
+  position: fixed;
+  top: 72px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.nav-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
 /* Hamburger Button */
 .hamburger-btn {
   display: none;
   flex-direction: column;
-  justify-content: space-around;
-  width: 38px;
-  height: 38px;
-  padding: 7px;
+  justify-content: space-between;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 10px 8px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--panel-border);
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   z-index: 1005;
   transition: all 0.25s ease;
+}
+
+.hamburger-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 body.light-theme .hamburger-btn {
@@ -4148,23 +4178,25 @@ body.retro-theme .hamburger-btn {
 }
 
 .hamburger-bar {
-  width: 100%;
-  height: 2.5px;
+  width: 22px;
+  height: 2px;
   background-color: var(--text-primary);
   border-radius: 2px;
-  transition: all 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+  transform-origin: center;
 }
 
 .hamburger-btn.active .hamburger-bar:nth-child(1) {
-  transform: translateY(7.5px) rotate(45deg);
+  transform: translateY(8px) rotate(45deg);
 }
 
 .hamburger-btn.active .hamburger-bar:nth-child(2) {
   opacity: 0;
+  transform: scaleX(0);
 }
 
 .hamburger-btn.active .hamburger-bar:nth-child(3) {
-  transform: translateY(-7.5px) rotate(-45deg);
+  transform: translateY(-8px) rotate(-45deg);
 }
 
 .nav-drawer {
@@ -4176,6 +4208,10 @@ body.retro-theme .hamburger-btn {
 }
 
 @media (max-width: 900px) {
+  .navbar {
+    padding: 0 16px;
+  }
+
   .hamburger-btn {
     display: flex;
   }
@@ -4190,29 +4226,29 @@ body.retro-theme .hamburger-btn {
     left: 0;
     right: 0;
     width: 100%;
-    background: hsl(240, 25%, 7%);
-    -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: rgba(13, 10, 25, 0.96);
+    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px);
     border-bottom: 1px solid var(--panel-border);
+    border-radius: 0 0 16px 16px;
     flex-direction: column;
-    padding: 20px 24px 28px;
-    gap: 20px;
+    padding: 20px 20px 24px;
+    gap: 16px;
     margin-left: 0;
     display: none;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
     z-index: 1000;
-    max-height: calc(100vh - 72px);
+    max-height: calc(100vh - 84px);
     overflow-y: auto;
   }
 
   body.light-theme .nav-drawer {
-    background: #f8fafc;
+    background: rgba(248, 250, 252, 0.97);
     border-bottom-color: rgba(0, 0, 0, 0.1);
   }
 
   body.retro-theme .nav-drawer {
-    background: #fdf6e3;
+    background: rgba(253, 246, 227, 0.97);
     border-bottom-color: rgba(181, 137, 0, 0.25);
   }
 
@@ -4237,9 +4273,8 @@ body.retro-theme .hamburger-btn {
 
   .nav-controls {
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: stretch;
     width: 100%;
     gap: 12px;
     padding-top: 16px;
@@ -4247,42 +4282,48 @@ body.retro-theme .hamburger-btn {
   }
 
   .student-badge {
-    flex: 1;
+    width: 100%;
     justify-content: center;
-    padding: 10px 16px;
+    padding: 12px 16px;
+    text-align: center;
   }
 
   .settings-menu-container {
     position: relative;
-    width: auto;
+    width: 100%;
   }
 
   .settings-cog-btn {
-    width: 42px;
+    width: 100%;
     height: 42px;
-    border-radius: 50%;
-    padding: 0;
+    border-radius: 10px;
+    padding: 0 16px;
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: 8px;
     background: rgba(255, 255, 255, 0.05);
-    flex-shrink: 0;
+    border: 1px solid var(--panel-border);
+    font-weight: 500;
+    color: var(--text-primary);
   }
 
-  body.light-theme .settings-cog-btn {
-    background: rgba(0, 0, 0, 0.04);
-  }
-
-  body.retro-theme .settings-cog-btn {
-    background: #eee8d5;
+  .settings-cog-btn::after {
+    content: " App Settings";
+    font-size: 0.9rem;
   }
 
   .settings-dropdown {
     position: static;
     width: 100%;
-    margin-top: 8px;
+    margin-top: 10px;
     box-shadow: none;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 12px;
   }
+}
 
   .dashboard-grid {
     grid-template-columns: 1fr;
