@@ -111,9 +111,13 @@ function init() {
     });
   }
 
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+  });
+
   const loginForm = document.getElementById("login-form");
   if (loginForm) {
-    loginForm.addEventListener("submit", handleLogin);
+    loginForm.addEventListener("submit", handleProfileSubmit);
   }
 
   document.addEventListener("click", (e) => {
@@ -244,7 +248,7 @@ export function updateDashboard() {
   if (progressBarEl) progressBarEl.style.width = `${pct}%`;
 
   logProgressHistory(pct);
-  checkAchievementUnlocks();
+  checkAchievementUnlocks(categoryStats);
   checkBackupMilestones(pct);
 
   const { current, next } = getDirectorRank(pct);
@@ -439,8 +443,93 @@ export function openLoginOverlay() {
     closeLoginBtn.style.display = currentState.selectedStudent ? "block" : "none";
   }
   
+  renderSavedLocalProfiles();
+
   const loginOverlay = document.getElementById("login-overlay");
   if (loginOverlay) loginOverlay.classList.add("active");
+}
+
+export function renderSavedLocalProfiles() {
+  const container = document.getElementById("existing-profiles-container");
+  const list = document.getElementById("local-profiles-list");
+  if (!container || !list) return;
+
+  const profiles = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith("cineskills_progress_")) {
+      const id = key.replace("cineskills_progress_", "");
+      const savedName = localStorage.getItem(`cineskills_name_${id}`);
+      const fallbackName = id.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      profiles.push({ id, name: savedName || fallbackName });
+    }
+  }
+
+  if (profiles.length === 0) {
+    container.style.display = "none";
+    return;
+  }
+
+  container.style.display = "block";
+  list.innerHTML = "";
+  profiles.forEach(p => {
+    const isCurrent = p.id === currentState.selectedStudent;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = `btn-utility ${isCurrent ? 'active' : ''}`;
+    btn.style.width = "100%";
+    btn.style.justifyContent = "space-between";
+    btn.style.padding = "10px 14px";
+    btn.style.fontSize = "0.85rem";
+    btn.style.background = isCurrent ? "rgba(59, 130, 246, 0.2)" : "rgba(255, 255, 255, 0.05)";
+    btn.style.borderColor = isCurrent ? "var(--accent-blue)" : "var(--panel-border)";
+    btn.innerHTML = `<span>👤 <strong>${p.name}</strong> (${p.id})</span><span>${isCurrent ? 'Active ✓' : 'Switch ➔'}</span>`;
+    btn.onclick = () => switchProfileTo(p.id, p.name);
+    list.appendChild(btn);
+  });
+}
+
+export function switchProfileTo(id, name) {
+  if (currentState.isAlanSmithee) {
+    currentState.isAlanSmithee = false;
+    document.body.classList.remove("smithee-mode");
+  }
+
+  setActiveStudentSession(id, name);
+  currentState.selectedStudent = id;
+  updateStudentHeader();
+  loadStudentProgress(id);
+  closeLoginOverlay();
+}
+
+export function handleProfileSubmit(event) {
+  if (event) {
+    if (typeof event.preventDefault === "function") event.preventDefault();
+    if (typeof event.stopPropagation === "function") event.stopPropagation();
+  }
+
+  const nameEl = document.getElementById("login-name");
+  const idEl = document.getElementById("login-id");
+  const nameInput = nameEl ? nameEl.value.trim() : "";
+  const idInput = idEl ? idEl.value.trim() : "";
+
+  if (!nameInput) {
+    alert("Please enter your Student Name.");
+    return false;
+  }
+
+  if (nameInput.toLowerCase() === "alan smithee") {
+    triggerAlanSmitheeMode();
+    return false;
+  }
+
+  const sanitizedId = idInput ? idInput.toLowerCase().replace(/[^a-z0-9_-]/g, "") : nameInput.toLowerCase().replace(/[^a-z0-9_-]/g, "_");
+  const studentId = sanitizedId || "student_" + Date.now();
+
+  localStorage.setItem(`cineskills_name_${studentId}`, nameInput);
+
+  switchProfileTo(studentId, nameInput);
+  return false;
 }
 
 export function closeLoginOverlay() {
@@ -504,34 +593,12 @@ export function toggleTheme() {
   selectTheme(themes[nextIndex]);
 }
 
-export function getRegisteredAccounts() {
-  try {
-    const raw = localStorage.getItem("cineskills_registered_accounts");
-    return raw ? JSON.parse(raw) : {};
-  } catch (e) {
-    return {};
-  }
-}
-
-export function saveRegisteredAccount(username, authHash) {
-  const accounts = getRegisteredAccounts();
-  const key = username.toLowerCase().trim();
-  accounts[key] = {
-    username: username,
-    authHash: authHash,
-    createdAt: new Date().toISOString()
-  };
-  localStorage.setItem("cineskills_registered_accounts", JSON.stringify(accounts));
-}
-
 export function handleSignOut() {
-  if (confirm("Are you sure you want to sign out?")) {
+  if (confirm("Are you sure you want to switch profile?")) {
     sessionStorage.removeItem("cineskills_active_student_id");
     sessionStorage.removeItem("cineskills_active_student_name");
     localStorage.removeItem("cineskills_last_student_id");
     localStorage.removeItem("cineskills_last_student_name");
-    localStorage.removeItem("cineskills_student_id");
-    localStorage.removeItem("cineskills_student_name");
 
     currentState.selectedStudent = "";
     currentState.progress = {};
@@ -543,69 +610,6 @@ export function handleSignOut() {
 
     openLoginOverlay();
   }
-}
-
-export async function handleLogin(event) {
-  if (event) {
-    if (typeof event.preventDefault === "function") event.preventDefault();
-    if (typeof event.stopPropagation === "function") event.stopPropagation();
-  }
-
-  const usernameEl = document.getElementById("login-username");
-  const passwordEl = document.getElementById("login-password");
-  const usernameInput = usernameEl ? usernameEl.value.trim() : "";
-  const passwordInput = passwordEl ? passwordEl.value : "";
-
-  if (!usernameInput || !passwordInput) {
-    alert("Please enter both your Username and Password / PIN.");
-    return false;
-  }
-
-  if (usernameInput.toLowerCase() === "alan smithee" || passwordInput.toLowerCase() === "alan smithee") {
-    triggerAlanSmitheeMode();
-    return false;
-  }
-
-  const sanitizedUser = usernameInput.toLowerCase().replace(/[^a-z0-9_-]/g, "");
-  const sessionStudentId = sanitizedUser || usernameInput.toLowerCase();
-
-  const accounts = getRegisteredAccounts();
-  const account = accounts[sessionStudentId];
-
-  // If local account registry exists and account is missing, check account registration!
-  if (!account && Object.keys(accounts).length > 0) {
-    alert(`No account found for username "${usernameInput}". Please click 'Create Account' to register your account first.`);
-    switchAuthTab('register');
-    const regUserEl = document.getElementById("reg-username");
-    if (regUserEl) regUserEl.value = usernameInput;
-    return false;
-  }
-
-  const authHash = await hashStudentId(sessionStudentId + ":" + passwordInput);
-
-  if (account && account.authHash && account.authHash !== authHash) {
-    alert(`Incorrect Password / PIN for username "${usernameInput}". Please try again.`);
-    return false;
-  }
-
-  // Register account record if missing
-  if (!account) {
-    saveRegisteredAccount(usernameInput, authHash);
-  }
-
-  if (currentState.isAlanSmithee) {
-    currentState.isAlanSmithee = false;
-    document.body.classList.remove("smithee-mode");
-  }
-
-  setActiveStudentSession(sessionStudentId, usernameInput);
-  currentState.selectedStudent = sessionStudentId;
-  updateStudentHeader();
-
-  loadStudentProgress(sessionStudentId);
-  closeLoginOverlay();
-
-  return false;
 }
 
 export function switchAuthTab(tabName) {
@@ -773,6 +777,7 @@ export function switchAchievementsTab(tabType) {
     if (achievementsBadgesBtn) achievementsBadgesBtn.classList.add("active");
     if (achievementsCardTitle) achievementsCardTitle.textContent = "Achievements";
   }
+  renderProfileView();
 }
 
 export function toggleDyslexiaFont() {
@@ -901,9 +906,8 @@ window.closeMobileMenu = closeMobileMenu;
 window.toggleDyslexiaFont = toggleDyslexiaFont;
 window.openLoginOverlay = openLoginOverlay;
 window.closeLoginOverlay = closeLoginOverlay;
-window.switchAuthTab = switchAuthTab;
-window.handleLogin = handleLogin;
-window.handleRegister = handleRegister;
+window.handleProfileSubmit = handleProfileSubmit;
+window.switchProfileTo = switchProfileTo;
 window.setMatrixLayout = setMatrixLayout;
 window.toggleTierSection = toggleTierSection;
 window.cycleSkillLevel = (e, catId, skillName) => cycleSkillLevel(e, catId, skillName, updateDashboard);

@@ -427,55 +427,35 @@
 
   </main>
 
-  <!-- Required Student Login Overlay -->
+  <!-- Student Profile Switcher Overlay (100% Local / Password-Free) -->
   <div id="login-overlay" class="modal-overlay">
-    <div class="modal-content login-card">
+    <div class="modal-content login-card" style="max-width: 480px;">
       <button id="close-login-btn" class="close-btn" aria-label="Close modal" onclick="closeLoginOverlay()" style="display: none;">&times;</button>
-      <h2 class="login-title">CineSkills Access</h2>
-      <p class="login-subtitle">Create a student account or log in to load your competency matrix.</p>
+      <h2 class="login-title">👤 Student Profile Switcher</h2>
+      <p class="login-subtitle">Select an existing profile or enter your details to load your local competency matrix.</p>
       
-      <!-- Modal Auth Switcher Tabs -->
-      <div class="auth-tabs" style="display: flex; gap: 8px; margin: 16px 0 20px 0; background: rgba(0,0,0,0.25); padding: 4px; border-radius: 10px; border: 1px solid var(--panel-border);">
-        <button type="button" id="tab-btn-login" class="auth-tab-btn active" onclick="switchAuthTab('login')" style="flex: 1; padding: 8px; border: none; border-radius: 6px; background: var(--accent-blue); color: #fff; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s ease;">🔑 Log In</button>
-        <button type="button" id="tab-btn-register" class="auth-tab-btn" onclick="switchAuthTab('register')" style="flex: 1; padding: 8px; border: none; border-radius: 6px; background: transparent; color: var(--text-secondary); font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s ease;">✨ Create Account</button>
+      <!-- Existing Local Profiles on this Device -->
+      <div id="existing-profiles-container" style="margin: 16px 0; display: none;">
+        <span class="input-label" style="display: block; margin-bottom: 8px;">Saved Profiles on this Device:</span>
+        <div id="local-profiles-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 160px; overflow-y: auto;">
+          <!-- Dynamically populated -->
+        </div>
+        <div style="text-align: center; margin: 12px 0 8px 0; color: var(--text-muted); font-size: 0.8rem;">— OR ENTER NEW DETAILS —</div>
       </div>
 
-      <!-- Form 1: Log In Form -->
-      <form id="login-form" onsubmit="return handleLogin(event);" style="display: block;">
+      <form id="login-form" onsubmit="return handleProfileSubmit(event);" style="display: block;">
         <div class="input-group">
-          <label for="login-username" class="input-label">Username</label>
-          <input type="text" id="login-username" placeholder="e.g. callum_film" class="login-input" autocomplete="username">
+          <label for="login-name" class="input-label">Student Name</label>
+          <input type="text" id="login-name" placeholder="e.g. Callum O'Connor" class="login-input" required>
         </div>
         
         <div class="input-group" style="margin-top: 14px;">
-          <label for="login-password" class="input-label">Password / PIN</label>
-          <input type="password" id="login-password" placeholder="••••••••" class="login-input" autocomplete="current-password">
+          <label for="login-id" class="input-label">Student ID / Code (Optional)</label>
+          <input type="text" id="login-id" placeholder="e.g. OCO26000271" class="login-input">
         </div>
         
-        <button type="button" onclick="handleLogin(event)" class="btn-status status-completed" style="margin-top: 20px; font-family: 'Outfit', sans-serif; width: 100%; justify-content: center; cursor: pointer;">
-          Log In & Access Matrix
-        </button>
-      </form>
-
-      <!-- Form 2: Create Account Form -->
-      <form id="register-form" onsubmit="return handleRegister(event);" style="display: none;">
-        <div class="input-group">
-          <label for="reg-username" class="input-label">Choose Username</label>
-          <input type="text" id="reg-username" placeholder="e.g. callum_film" class="login-input" autocomplete="username">
-        </div>
-        
-        <div class="input-group" style="margin-top: 14px;">
-          <label for="reg-password" class="input-label">Create Password / PIN</label>
-          <input type="password" id="reg-password" placeholder="••••••••" class="login-input" autocomplete="new-password">
-        </div>
-
-        <div class="input-group" style="margin-top: 14px;">
-          <label for="reg-password-confirm" class="input-label">Confirm Password / PIN</label>
-          <input type="password" id="reg-password-confirm" placeholder="••••••••" class="login-input" autocomplete="new-password">
-        </div>
-        
-        <button type="button" onclick="handleRegister(event)" class="btn-status status-completed" style="margin-top: 20px; font-family: 'Outfit', sans-serif; width: 100%; justify-content: center; cursor: pointer;">
-          Create Account & Access Matrix
+        <button type="submit" class="btn-status status-completed" style="margin-top: 20px; font-family: 'Outfit', sans-serif; width: 100%; justify-content: center; cursor: pointer;">
+          Load Student Profile & Matrix
         </button>
       </form>
     </div>

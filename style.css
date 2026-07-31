@@ -4315,3 +4315,191 @@ body.retro-theme .hamburger-btn {
     transform: translateY(0);
   }
 }
+
+/* ==========================================================================
+   Modal Overlay, Content & Close Button Styling
+   ========================================================================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(8, 6, 18, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  position: relative;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.8), 0 0 32px var(--accent-blue-glow);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 28px 24px;
+  max-width: 650px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.close-btn {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fff;
+  transform: scale(1.1);
+}
+
+/* ==========================================================================
+   Milestones, Achievements & Notification Toasts
+   ========================================================================== */
+.milestones-list, .achievements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.milestone-item, .achievement-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  transition: all 0.25s ease;
+}
+
+.milestone-item.unlocked, .achievement-item.unlocked {
+  background: rgba(16, 185, 129, 0.06);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.milestone-item.locked, .achievement-item.locked {
+  opacity: 0.6;
+  filter: grayscale(0.6);
+}
+
+.milestone-status, .achievement-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.milestone-details, .achievement-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-grow: 1;
+}
+
+.milestone-title, .achievement-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.milestone-director, .achievement-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.achievement-progress {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-blue);
+  margin-top: 2px;
+}
+
+.achievement-item.unlocked .achievement-progress {
+  color: var(--color-completed);
+}
+
+/* Toast Notifications Container */
+.notification-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.notification-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid var(--accent-gold);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(234, 179, 8, 0.2);
+  border-radius: 12px;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  max-width: 360px;
+  animation: slideInToast 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.notification-toast.fade-out {
+  animation: fadeOutToast 0.4s ease forwards;
+}
+
+@keyframes slideInToast {
+  from {
+    opacity: 0;
+    transform: translateX(40px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes fadeOutToast {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(40px) scale(0.9);
+  }
+}
+

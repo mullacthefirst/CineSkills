@@ -146,7 +146,7 @@ export const ACHIEVEMENT_BADGES = [
   }
 ];
 
-export function checkAchievementUnlocks() {
+export function checkAchievementUnlocks(categoryStats) {
   if (!currentState.selectedStudent) return;
   const studentId = currentState.selectedStudent;
   const storageKey = `cineskills_unlocked_achievements_${studentId}`;
@@ -157,9 +157,10 @@ export function checkAchievementUnlocks() {
     if (raw) unlockedList = JSON.parse(raw);
   } catch (e) {}
 
+  const stats = categoryStats || {};
   let updated = false;
   ACHIEVEMENT_BADGES.forEach(badge => {
-    const res = badge.check({}, currentState.progress);
+    const res = badge.check(stats, currentState.progress || {});
     if (res.unlocked && !unlockedList.includes(badge.id)) {
       unlockedList.push(badge.id);
       updated = true;
@@ -185,25 +186,20 @@ export function showAchievementToast(badge) {
 
   const toast = document.createElement("div");
   toast.className = "notification-toast achievement-toast";
-  toast.style.borderColor = "var(--accent-gold)";
-  toast.style.boxShadow = "0 8px 32px rgba(234, 179, 8, 0.3)";
   toast.innerHTML = `
-    <div style="font-size: 1.8rem; margin-right: 12px;">${badge.emoji}</div>
+    <div class="achievement-icon" style="font-size: 1.8rem;">${badge.emoji}</div>
     <div style="flex: 1;">
-      <div style="font-weight: 700; color: var(--accent-gold); font-size: 0.9rem;">🏆 ACHIEVEMENT UNLOCKED!</div>
-      <div style="font-weight: 600; font-size: 1rem; color: #fff; margin-top: 2px;">${badge.name}</div>
-      <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">${badge.desc}</div>
+      <div style="font-weight: 700; color: var(--accent-gold); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">🏆 Achievement Unlocked!</div>
+      <div style="font-weight: 700; font-size: 0.95rem; color: #fff; margin-top: 2px;">${badge.name}</div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">${badge.desc}</div>
     </div>
   `;
   container.appendChild(toast);
-  setTimeout(() => {
-    toast.classList.add("show");
-  }, 50);
 
   setTimeout(() => {
-    toast.classList.remove("show");
-    setTimeout(() => toast.remove(), 400);
-  }, 4500);
+    toast.classList.add("fade-out");
+    setTimeout(() => toast.remove(), 450);
+  }, 5000);
 }
 
 export function renderAchievements(categoryStats) {
