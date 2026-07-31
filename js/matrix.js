@@ -164,9 +164,25 @@ export function renderSkillMatrix() {
       `;
     }
 
+    let totalCatXp = 0;
+    let earnedCatXp = 0;
+    cat.skills.forEach(s => {
+      totalCatXp += s.xp;
+      const sState = currentState.progress[s.name] || { level: 0 };
+      if (sState.level === 1) earnedCatXp += s.xp * 0.5;
+      else if (sState.level === 2) earnedCatXp += s.xp;
+    });
+    const catPct = totalCatXp > 0 ? Math.round((earnedCatXp / totalCatXp) * 100) : 0;
+
     catSection.innerHTML = `
       <div class="category-header">
-        <h3>${cat.emoji} ${cat.name}</h3>
+        <div class="category-header-top" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h3 style="margin: 0;">${cat.emoji} ${cat.name}</h3>
+          <span class="category-pct-badge" style="font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--accent-blue); background: rgba(255,255,255,0.06); padding: 3px 10px; border-radius: 12px; border: 1px solid var(--panel-border);">${catPct}%</span>
+        </div>
+        <div class="progress-track-mini" style="margin-bottom: 12px;">
+          <div class="progress-bar-mini" style="width: ${catPct}%;"></div>
+        </div>
         <p class="category-desc">${cat.description}</p>
       </div>
       ${bodyHtml}

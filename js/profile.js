@@ -575,20 +575,3 @@ export function exportPDF() {
   printContainer.innerHTML = printHtml;
   window.print();
 }
-
-export function exportCrewCard() {
-  exportData();
-}
-
-export function triggerCrewCardImport() {
-  triggerImportJSON();
-}
-
-export function importCrewCard(event) {
-  importData(event);
-}
-
-export function closeCrewCardModal() {
-  const modal = document.getElementById("crew-card-modal");
-  if (modal) modal.classList.remove("active");
-}

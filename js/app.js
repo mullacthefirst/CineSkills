@@ -1,11 +1,11 @@
 // Main Application Entry Point for CineSkills (ES6 Modules)
 import { currentState, saveStudentProgress, getDirectorRank, calculateArchetype } from './state.js';
 import { renderSkillMatrix, toggleTierSection, cycleSkillLevel, openSkillDetail, setModalCompetencyLevel, handleNotesInput, closeModal } from './matrix.js';
-import { renderProfileView, savePortfolioBio, updateShowreel, openAddProjectModal, closeAddProjectModal, handleAddProjectSubmit, deletePortfolioProject, exportData, importData, triggerImportJSON, exportPDF, exportCrewCard, triggerCrewCardImport, importCrewCard, closeCrewCardModal } from './profile.js';
+import { renderProfileView, savePortfolioBio, updateShowreel, openAddProjectModal, closeAddProjectModal, handleAddProjectSubmit, deletePortfolioProject, exportData, importData, triggerImportJSON, exportPDF } from './profile.js';
 import { logProgressHistory } from './charts.js';
 import { renderGearView, renderLicenseDashboard, downloadCertificate } from './gear.js';
 import { renderQuestsView, renderInspirationView, getQuestBonusXp, startMicroQuiz, nextQuizStep, applyQuizRecommendation, claimQuestReward, ACHIEVEMENT_BADGES, renderAchievements, checkAchievementUnlocks } from './quests.js';
-import { openTeacherDashboardModal, hashStudentId } from './sync.js';
+import { hashStudentId } from './sync.js';
 
 let targetX = 0, targetY = 0, curX = 0, curY = 0;
 let deferredPrompt = null;
@@ -276,27 +276,7 @@ export function updateDashboard() {
     archetypeDescEl.textContent = archetype.desc;
   }
 
-  const categoryBreakdown = document.getElementById("category-breakdown");
-  if (categoryBreakdown) {
-    categoryBreakdown.innerHTML = "";
-    window.CINESKILLS_DATABASE.categories.forEach(cat => {
-      const stats = categoryStats[cat.id];
-      const catPct = stats.totalXp > 0 ? Math.round((stats.earnedXp / stats.totalXp) * 100) : 0;
-      
-      const barHtml = `
-        <div class="category-stat-row">
-          <div class="category-stat-info">
-            <span>${cat.emoji} ${cat.name}</span>
-            <span class="pct-text">${catPct}%</span>
-          </div>
-          <div class="progress-track-mini">
-            <div class="progress-bar-mini" style="width: ${catPct}%"></div>
-          </div>
-        </div>
-      `;
-      categoryBreakdown.innerHTML += barHtml;
-    });
-  }
+
 
   const profileView = document.getElementById("profile-view");
   if (profileView && profileView.classList.contains("active")) {
@@ -1009,11 +989,6 @@ window.applyQuizRecommendation = (level) => applyQuizRecommendation(level, updat
 window.claimQuestReward = (id) => claimQuestReward(id, updateDashboard);
 window.toggleEmojiPicker = toggleEmojiPicker;
 window.selectProfileEmoji = selectProfileEmoji;
-window.openTeacherDashboardModal = openTeacherDashboardModal;
-window.exportCrewCard = exportCrewCard;
-window.triggerCrewCardImport = triggerCrewCardImport;
-window.importCrewCard = importCrewCard;
-window.closeCrewCardModal = closeCrewCardModal;
 
 window.promptInstallPWA = function() {
   if (deferredPrompt) {

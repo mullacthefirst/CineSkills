@@ -20,7 +20,7 @@
   <header class="navbar">
     <div class="nav-brand">
       <span class="logo-text">CineSkills</span>
-      <span class="app-version-tag">v25</span>
+      <span class="app-version-tag">v26</span>
       <span class="logo-subtitle">The Creative Media Skill Tracker</span>
     </div>
 
@@ -69,9 +69,6 @@
             </div>
             <button id="pwa-install-btn" class="menu-item" onclick="promptInstallPWA()" style="display: none;">
               <span class="menu-item-icon">📲</span> Install App (PWA)
-            </button>
-            <button id="teacher-view-btn" class="menu-item" onclick="openTeacherDashboardModal()">
-              <span class="menu-item-icon">👩‍🏫</span> Educator Class View
             </button>
             <hr class="menu-divider">
             <div class="menu-section-header">Local Data & Backup</div>
@@ -132,14 +129,6 @@
             <div class="progress-track">
               <div id="progress-bar" class="progress-fill" style="width: 0%"></div>
             </div>
-          </div>
-        </div>
-        
-        <!-- Category Breakdown Grid -->
-        <div class="glass-panel category-breakdown-panel">
-          <h4>Category Breakdown</h4>
-          <div id="category-breakdown" class="category-stats-list">
-            <!-- Populated dynamically via JS -->
           </div>
         </div>
       </section>
@@ -258,19 +247,12 @@
           <hr class="menu-divider" style="margin: 20px 0;">
           
           <div class="crew-card-actions-container" style="width: 100%;">
-            <span class="rank-label" style="display: block; margin-bottom: 8px;">Local Backup & Card Exchange</span>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <div style="display: flex; gap: 8px;">
-                <button class="btn-utility" style="flex: 1; justify-content: center; font-size: 0.8rem;" onclick="exportData()">💾 Export Backup</button>
-                <button class="btn-utility" style="flex: 1; justify-content: center; font-size: 0.8rem;" onclick="triggerImportJSON()">📂 Import Backup</button>
-              </div>
-              <div style="display: flex; gap: 8px;">
-                <button class="btn-utility" style="flex: 1; justify-content: center; font-size: 0.75rem; opacity: 0.8;" onclick="exportCrewCard()">📤 Card Only</button>
-                <button class="btn-utility" style="flex: 1; justify-content: center; font-size: 0.75rem; opacity: 0.8;" onclick="triggerCrewCardImport()">📥 Card Only</button>
-              </div>
-              <input type="file" id="import-json-file-input" accept=".json" style="display: none;" onchange="importData(event)">
-              <input type="file" id="import-crew-card-file" accept=".json" style="display: none;" onchange="importCrewCard(event)">
+            <span class="rank-label" style="display: block; margin-bottom: 8px;">Local Data Backup</span>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-utility" style="flex: 1; justify-content: center; font-size: 0.8rem;" onclick="exportData()">💾 Export Backup</button>
+              <button class="btn-utility" style="flex: 1; justify-content: center; font-size: 0.8rem;" onclick="triggerImportJSON()">📂 Import Backup</button>
             </div>
+            <input type="file" id="import-json-file-input" accept=".json" style="display: none;" onchange="importData(event)">
           </div>
         </div>
         
@@ -592,51 +574,7 @@
     </div>
   </div>
 
-  <!-- Crew Card Viewer Modal -->
-  <div id="crew-card-modal" class="modal-overlay" onclick="closeCrewCardModal()">
-    <div class="modal-content crew-card-viewer-card" onclick="event.stopPropagation()">
-      <button class="close-btn" aria-label="Close modal" onclick="closeCrewCardModal()">&times;</button>
-      
-      <div class="dossier-header" style="align-items: center; display: flex; gap: 16px;">
-        <div class="profile-pic-wrapper" style="pointer-events: none;">
-          <div id="crew-modal-emoji" class="profile-pic"><span class="emoji-content">🎬</span></div>
-        </div>
-        <div class="dossier-identity">
-          <span class="dossier-label">Imported Crew Card</span>
-          <h2 id="crew-modal-name">Classmate Name</h2>
-          <p id="crew-modal-id" class="dossier-id">ID: Classmate ID</p>
-        </div>
-      </div>
-      
-      <hr class="menu-divider" style="margin: 20px 0;">
-      
-      <div class="dossier-badges" style="margin-bottom: 20px;">
-        <div class="dossier-badge-item">
-          <span class="rank-label">Specialist Archetype</span>
-          <div id="crew-modal-archetype" class="rank-badge" style="color: var(--color-completed);">🙋‍♂️ Crew Member</div>
-        </div>
-      </div>
-      
-      <div class="portfolio-bio-container" style="margin-bottom: 20px;">
-        <span class="rank-label">Filmmaker Bio</span>
-        <p id="crew-modal-bio" style="font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary); margin: 6px 0 0 0; background: rgba(0,0,0,0.15); padding: 12px; border-radius: 8px; border: 1px solid var(--panel-border); font-style: italic;">No bio written yet.</p>
-      </div>
 
-      <div class="input-group" style="margin-bottom: 20px;">
-        <span class="rank-label">Competency Breakdown</span>
-        <div id="crew-modal-categories" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px;">
-          <!-- Populated dynamically -->
-        </div>
-      </div>
-
-      <div class="input-group">
-        <span class="rank-label">Mastered Skills</span>
-        <div id="crew-modal-skills" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; max-height: 120px; overflow-y: auto; background: rgba(0,0,0,0.15); padding: 10px; border-radius: 8px; border: 1px solid var(--panel-border);">
-          <!-- Populated dynamically -->
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- Import application JS scripts -->
   <script src="data.js?v=22"></script>

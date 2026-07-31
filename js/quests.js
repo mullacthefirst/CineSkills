@@ -14,15 +14,20 @@ export const ACHIEVEMENT_BADGES = [
       return { unlocked: count >= 3, current: count, target: 3 };
     }
   },
-  { id: "story_architect", name: "Story Architect", emoji: "📖", desc: "Master 3 Story category skills.", check: (stats, progress) => {
+  { id: "story_architect", name: "Story Master", emoji: "📖", desc: "Complete all skills in the Story category.", check: (stats, progress) => {
+      const cat = window.CINESKILLS_DATABASE ? window.CINESKILLS_DATABASE.categories.find(c => c.id === "story") : null;
+      if (!cat) return { unlocked: false, current: 0, target: 1 };
       let count = 0;
-      const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === "story");
-      if (cat) {
-        cat.skills.forEach(s => {
-          if (progress[s.name] && progress[s.name].level === 2) count++;
-        });
-      }
-      return { unlocked: count >= 3, current: count, target: 3 };
+      cat.skills.forEach(s => { if (progress[s.name] && progress[s.name].level === 2) count++; });
+      return { unlocked: count === cat.skills.length, current: count, target: cat.skills.length };
+    }
+  },
+  { id: "preprod_master", name: "Pre-Production Master", emoji: "📋", desc: "Complete all skills in the Pre-Production category.", check: (stats, progress) => {
+      const cat = window.CINESKILLS_DATABASE ? window.CINESKILLS_DATABASE.categories.find(c => c.id === "pre-production") : null;
+      if (!cat) return { unlocked: false, current: 0, target: 1 };
+      let count = 0;
+      cat.skills.forEach(s => { if (progress[s.name] && progress[s.name].level === 2) count++; });
+      return { unlocked: count === cat.skills.length, current: count, target: cat.skills.length };
     }
   },
   { id: "safety_inspector", name: "Safety Inspector", emoji: "⚠️", desc: "Master C-Stand Safety and Tripod Safety.", check: (stats, progress) => {
@@ -32,48 +37,36 @@ export const ACHIEVEMENT_BADGES = [
       return { unlocked: count === 2, current: count, target: 2 };
     }
   },
-  { id: "cinematography_lead", name: "Cinematography Lead", emoji: "🎥", desc: "Master 3 Camera category skills.", check: (stats, progress) => {
+  { id: "cinematography_lead", name: "Camera Master", emoji: "🎥", desc: "Complete all skills in the Camera category.", check: (stats, progress) => {
+      const cat = window.CINESKILLS_DATABASE ? window.CINESKILLS_DATABASE.categories.find(c => c.id === "camera") : null;
+      if (!cat) return { unlocked: false, current: 0, target: 1 };
       let count = 0;
-      const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === "camera");
-      if (cat) {
-        cat.skills.forEach(s => {
-          if (progress[s.name] && progress[s.name].level === 2) count++;
-        });
-      }
-      return { unlocked: count >= 3, current: count, target: 3 };
+      cat.skills.forEach(s => { if (progress[s.name] && progress[s.name].level === 2) count++; });
+      return { unlocked: count === cat.skills.length, current: count, target: cat.skills.length };
     }
   },
-  { id: "gaffer_master", name: "Gaffer Master", emoji: "💡", desc: "Master 3 Lighting category skills.", check: (stats, progress) => {
+  { id: "gaffer_master", name: "Lighting Master", emoji: "💡", desc: "Complete all skills in the Lighting category.", check: (stats, progress) => {
+      const cat = window.CINESKILLS_DATABASE ? window.CINESKILLS_DATABASE.categories.find(c => c.id === "lighting") : null;
+      if (!cat) return { unlocked: false, current: 0, target: 1 };
       let count = 0;
-      const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === "lighting");
-      if (cat) {
-        cat.skills.forEach(s => {
-          if (progress[s.name] && progress[s.name].level === 2) count++;
-        });
-      }
-      return { unlocked: count >= 3, current: count, target: 3 };
+      cat.skills.forEach(s => { if (progress[s.name] && progress[s.name].level === 2) count++; });
+      return { unlocked: count === cat.skills.length, current: count, target: cat.skills.length };
     }
   },
-  { id: "sound_sage", name: "Sound Sage", emoji: "🎙️", desc: "Master 3 Audio category skills.", check: (stats, progress) => {
+  { id: "sound_sage", name: "Audio Master", emoji: "🎙️", desc: "Complete all skills in the Sound & Audio category.", check: (stats, progress) => {
+      const cat = window.CINESKILLS_DATABASE ? window.CINESKILLS_DATABASE.categories.find(c => c.id === "audio") : null;
+      if (!cat) return { unlocked: false, current: 0, target: 1 };
       let count = 0;
-      const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === "audio");
-      if (cat) {
-        cat.skills.forEach(s => {
-          if (progress[s.name] && progress[s.name].level === 2) count++;
-        });
-      }
-      return { unlocked: count >= 3, current: count, target: 3 };
+      cat.skills.forEach(s => { if (progress[s.name] && progress[s.name].level === 2) count++; });
+      return { unlocked: count === cat.skills.length, current: count, target: cat.skills.length };
     }
   },
-  { id: "post_prod_spec", name: "Post-Prod Specialist", emoji: "🎞️", desc: "Master 3 Post-Production category skills.", check: (stats, progress) => {
+  { id: "post_prod_spec", name: "Post-Production Master", emoji: "🎞️", desc: "Complete all skills in the Post-Production category.", check: (stats, progress) => {
+      const cat = window.CINESKILLS_DATABASE ? window.CINESKILLS_DATABASE.categories.find(c => c.id === "post-production") : null;
+      if (!cat) return { unlocked: false, current: 0, target: 1 };
       let count = 0;
-      const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === "post-production");
-      if (cat) {
-        cat.skills.forEach(s => {
-          if (progress[s.name] && progress[s.name].level === 2) count++;
-        });
-      }
-      return { unlocked: count >= 3, current: count, target: 3 };
+      cat.skills.forEach(s => { if (progress[s.name] && progress[s.name].level === 2) count++; });
+      return { unlocked: count === cat.skills.length, current: count, target: cat.skills.length };
     }
   },
   { id: "evidence_archivist", name: "Evidence Archivist", emoji: "✍️", desc: "Add evidence notes to 5 skills.", check: (stats, progress) => {
@@ -84,48 +77,36 @@ export const ACHIEVEMENT_BADGES = [
       return { unlocked: count >= 5, current: count, target: 5 };
     }
   },
-  { id: "producer_guild", name: "Producer's Guild", emoji: "📋", desc: "Master 3 Management category skills.", check: (stats, progress) => {
+  { id: "producer_guild", name: "Management Master", emoji: "📁", desc: "Complete all skills in the Management category.", check: (stats, progress) => {
+      const cat = window.CINESKILLS_DATABASE ? window.CINESKILLS_DATABASE.categories.find(c => c.id === "management") : null;
+      if (!cat) return { unlocked: false, current: 0, target: 1 };
       let count = 0;
-      const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === "management");
-      if (cat) {
-        cat.skills.forEach(s => {
-          if (progress[s.name] && progress[s.name].level === 2) count++;
-        });
-      }
-      return { unlocked: count >= 3, current: count, target: 3 };
+      cat.skills.forEach(s => { if (progress[s.name] && progress[s.name].level === 2) count++; });
+      return { unlocked: count === cat.skills.length, current: count, target: cat.skills.length };
     }
   },
-  { id: "industry_ready", name: "Industry Ready", emoji: "💼", desc: "Master 3 Professional Practice skills.", check: (stats, progress) => {
+  { id: "industry_ready", name: "Professional Practice Master", emoji: "💼", desc: "Complete all skills in Professional Practice.", check: (stats, progress) => {
+      const cat = window.CINESKILLS_DATABASE ? window.CINESKILLS_DATABASE.categories.find(c => c.id === "professional-practice") : null;
+      if (!cat) return { unlocked: false, current: 0, target: 1 };
       let count = 0;
-      const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === "professional-practice");
-      if (cat) {
-        cat.skills.forEach(s => {
-          if (progress[s.name] && progress[s.name].level === 2) count++;
-        });
-      }
-      return { unlocked: count >= 3, current: count, target: 3 };
+      cat.skills.forEach(s => { if (progress[s.name] && progress[s.name].level === 2) count++; });
+      return { unlocked: count === cat.skills.length, current: count, target: cat.skills.length };
     }
   },
-  { id: "film_scholar", name: "Film Scholar", emoji: "📚", desc: "Master 3 Research category skills.", check: (stats, progress) => {
+  { id: "film_scholar", name: "Research Master", emoji: "📚", desc: "Complete all skills in the Research category.", check: (stats, progress) => {
+      const cat = window.CINESKILLS_DATABASE ? window.CINESKILLS_DATABASE.categories.find(c => c.id === "research") : null;
+      if (!cat) return { unlocked: false, current: 0, target: 1 };
       let count = 0;
-      const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === "research");
-      if (cat) {
-        cat.skills.forEach(s => {
-          if (progress[s.name] && progress[s.name].level === 2) count++;
-        });
-      }
-      return { unlocked: count >= 3, current: count, target: 3 };
+      cat.skills.forEach(s => { if (progress[s.name] && progress[s.name].level === 2) count++; });
+      return { unlocked: count === cat.skills.length, current: count, target: cat.skills.length };
     }
   },
-  { id: "gear_wizard", name: "Gear Wizard", emoji: "🛠️", desc: "Master 3 Technician category skills.", check: (stats, progress) => {
+  { id: "gear_wizard", name: "Technical Master", emoji: "🛠️", desc: "Complete all skills in the Technical category.", check: (stats, progress) => {
+      const cat = window.CINESKILLS_DATABASE ? window.CINESKILLS_DATABASE.categories.find(c => c.id === "technician") : null;
+      if (!cat) return { unlocked: false, current: 0, target: 1 };
       let count = 0;
-      const cat = window.CINESKILLS_DATABASE.categories.find(c => c.id === "technician");
-      if (cat) {
-        cat.skills.forEach(s => {
-          if (progress[s.name] && progress[s.name].level === 2) count++;
-        });
-      }
-      return { unlocked: count >= 3, current: count, target: 3 };
+      cat.skills.forEach(s => { if (progress[s.name] && progress[s.name].level === 2) count++; });
+      return { unlocked: count === cat.skills.length, current: count, target: cat.skills.length };
     }
   },
   { id: "all_round_auteur", name: "All-Round Auteur", emoji: "🌟", desc: "Master at least 1 skill in all 10 categories.", check: (stats, progress) => {
